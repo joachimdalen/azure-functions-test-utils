@@ -10,6 +10,15 @@ In the `AssemblyInit` method, set your function app output path, e.g `src/Sample
 
 On startup, paths for `FuncHostPath` (azure-functions-core-tools) and `DotNetPath` will try to be resolved from the system if they are left unconfigured.
 
+### Planned support
+
+- Running function host
+- Running Azurite for storage account emulation
+
+**Future:**
+
+- Running CosmosDB emulator
+
 # Example
 
 ```csharp
