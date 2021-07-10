@@ -1,4 +1,5 @@
 ﻿using AzureFunctions.TestUtils;
+using AzureFunctions.TestUtils.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace SampleFunctions.IntegrationTests
@@ -11,7 +12,12 @@ namespace SampleFunctions.IntegrationTests
         {
             var settings = new TestUtilsSettings
             {
-                FuncAppPath = "../../../../SampleFunctions/bin/Debug/netcoreapp3.1"
+                FuncAppPath = "../../../../SampleFunctions/bin/Debug/netcoreapp3.1",
+                Storage = new StorageSettings
+                {
+                    AccountKey = "account1",
+                    AccountName = "key1"
+                }
             };
             AssemblyInitialize(context, settings);
         }

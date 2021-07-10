@@ -11,6 +11,7 @@ namespace SampleFunctions.IntegrationTests
     {
         [TestMethod]
         [StartFunctions(nameof(GetHello))]
+        [UseFunctionKey(nameof(GetHello), "main", "helloValue")]
         public async Task GetHello_NoQueryParams_ReturnsBadRequest()
         {
             var response = await Fixture.Client.GetAsync("/api/hello");

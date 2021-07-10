@@ -3,7 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using AzureFunctions.TestUtils.Extensions;
+using AzureFunctions.TestUtils.Handlers;
 using AzureFunctions.TestUtils.Models;
+using AzureFunctions.TestUtils.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AzureFunctions.TestUtils
@@ -30,7 +32,20 @@ namespace AzureFunctions.TestUtils
 
             if (string.IsNullOrEmpty(settings.FuncHostPath))
             {
-                settings.FuncHostPath = ExecutableResolver.GetFunctionHostPath();
+                settings.FuncHostPath = ExecutableResolver.GetFunctionHostPath() + ".dll";
+
+                if (!settings.FuncHostPath.EndsWith("func.dll"))
+                {
+                    if (settings.FuncHostPath.EndsWith("/"))
+                        settings.FuncHostPath += "func.dll";
+                    else
+                        settings.FuncHostPath += "/func.dll";
+                }
+
+                if (!File.Exists(settings.FuncHostPath))
+                {
+                    throw new Exception("FuncAppPath must be the full path, including func.dll");
+                }
             }
 
             if (string.IsNullOrEmpty(settings.FuncAppPath))
@@ -43,6 +58,17 @@ namespace AzureFunctions.TestUtils
                 settings.FuncAppPath = Path.GetFullPath(settings.FuncAppPath);
             }
 
+            if (string.IsNullOrEmpty(settings.StorageConnectionString) && settings.Storage == null)
+            {
+                settings.StorageConnectionString = "UseDevelopmentStorage=true";
+            }
+            else
+            {
+                settings.Storage ??= new StorageSettings();
+                settings.StorageConnectionString = StorageHandler.GetConnectionString(settings.Storage);
+            }
+
+
             Context.Data.Settings = settings;
         }
 
@@ -51,11 +77,10 @@ namespace AzureFunctions.TestUtils
         {
             lock (Context.Data)
             {
-                if (!Context.Data.IsInitialized)
-                {
-                    Fixture = new FunctionTestFixture();
-                    Context.Data.IsInitialized = true;
-                }
+                if (Context.Data.IsInitialized) return;
+
+                Fixture = new FunctionTestFixture();
+                Context.Data.IsInitialized = true;
             }
         }
 
@@ -67,8 +92,9 @@ namespace AzureFunctions.TestUtils
                 var currentTest = GetCurrentTestMethod();
                 var functionKeys = currentTest.GetFunctionKeys()?.Select(x => new FunctionKey
                 {
-                    Key = x.Key,
-                    Level = x.Level
+                    FunctionName = x.FunctionName,
+                    Name = x.Name,
+                    Value = x.Value
                 }).ToArray();
                 var functionsToRun = currentTest.GetStartFunctions()?.FirstOrDefault()?.FunctionNames;
                 var enableAuth = currentTest.GetUseFunctionAuth();

@@ -75,6 +75,8 @@ namespace AzureFunctions.TestUtils
                         WorkingDirectory = functionAppFolder
                     },
                 };
+                _funcHostProcess.StartInfo.EnvironmentVariables["AzureWebJobsStorage"] =
+                    Context.Data.Settings.StorageConnectionString;
                 var success = _funcHostProcess.Start();
                 if (!success)
                 {

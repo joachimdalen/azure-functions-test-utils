@@ -1,17 +1,21 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using Azure.Storage.Blobs;
 
 namespace AzureFunctions.TestUtils.Handlers
 {
     internal class FunctionKeyHandler
     {
         private const string BlobContainerName = "azure-webjobs-secrets";
+        private readonly BlobContainerClient _blobContainerClient;
 
         public FunctionKeyHandler()
         {
             var blobPath = $"{BlobContainerName}";
             var host = GetFunctionHostId();
+            var blobServiceClient = new BlobServiceClient(Context.Data.Settings.StorageConnectionString);
+            _blobContainerClient = blobServiceClient.GetBlobContainerClient(BlobContainerName);
         }
 
         private static int GetStableHash(string value)

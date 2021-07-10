@@ -1,4 +1,5 @@
 ﻿using AzureFunctions.TestUtils.Models;
+using AzureFunctions.TestUtils.Settings;
 
 namespace AzureFunctions.TestUtils
 {

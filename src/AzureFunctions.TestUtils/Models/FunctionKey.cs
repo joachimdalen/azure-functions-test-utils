@@ -2,9 +2,8 @@
 {
     public class FunctionKey
     {
-        public string Key { get; set; }
-        public FunctionAuthLevel Level { get; set; }
-        
+        public string Name { get; set; }
+        public string Value { get; set; }
         public string FunctionName { get; set; }
         
     }
