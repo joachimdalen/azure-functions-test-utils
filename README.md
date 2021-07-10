@@ -58,3 +58,43 @@ namespace SampleFunctions.IntegrationTests
     }
 }
 ```
+
+## Usage
+
+### Starting functions
+
+The `StartFunctions` attribute allows you to select functions to run for the test.
+
+**Run a single function**
+
+```csharp
+[TestMethod]
+[StartFunctions(nameof(GetOrder))]
+public async Task GerOrder_Returns_Ok()
+{
+    var response = await Fixture.Client.GetAsync("/api/order/2556");
+    Assert.IsTrue(response.IsSuccessStatusCode);
+}
+```
+
+**Run multiple functions**
+
+```csharp
+[TestMethod]
+[StartFunctions(nameof(GetOrders), nameof(GetOrderItems))]
+public async Task GetOrderItems_Returns_Ok()
+{
+    var response = await Fixture.Client.GetAsync("/api/orders");
+    var responseText = await response.Content.ReadAsStringAsync();
+
+    dynamic reponseObj = JsonConvert.DeserializeObject(responseText);
+    var orderId = responseObj[0].orderId;
+    var itemsResponse = await Fixture.Client.GetAsync($"/api/order/{orderId}/items");
+
+    Assert.IsTrue(response.itemsResponse);
+}
+```
+
+### Authorization
+
+By default function authorization is not enabled when running locally. This can be enabled by adding the attribute `UseFunctionAuth`.
