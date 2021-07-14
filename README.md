@@ -2,6 +2,9 @@
 
 > MSTest wrapper for Azure Functions Core Tools for easy bootstrapping of integration tests.
 
+
+Currently under development to make things work together. When all the intial functionality is in place, a refactor will be done to clean some things up.
+
 ## Getting started
 
 Add the following base class [BaseFunctionTest](src/SampleFunctions.IntegrationTests/BaseFunctionTest.cs) to your test project, this allows us to hook into MSTest. All your test needs to inherit from this class.
@@ -12,12 +15,13 @@ On startup, paths for `FuncHostPath` (azure-functions-core-tools) and `DotNetPat
 
 ### Planned support
 
-- Running function host
-- Running Azurite for storage account emulation
+- Running function host (In progress)
+- Running Azurite for storage account emulation (In progress)
 
 **Future:**
 
 - Running CosmosDB emulator
+- Support for running side services as Docker containers
 
 # Example
 
@@ -97,4 +101,18 @@ public async Task GetOrderItems_Returns_Ok()
 
 ### Authorization
 
-By default function authorization is not enabled when running locally. This can be enabled by adding the attribute `UseFunctionAuth`.
+By default function authorization is not enabled when running locally. This can be enabled by adding the attribute `UseFunctionAuth`. Function and host keys can be pre generated using the attributes `UseFunctionKey` and `UseHostKey`.
+
+```csharp
+[TestMethod]
+[UseFunctionAuth]
+[StartFunctions(nameof(GetHello))]
+[UseFunctionKey(nameof(GetHello), "main", "helloValue")]
+public async Task GetHello_Key_ReturnsOk()
+{
+    var httpRequest = new HttpRequestMessage(HttpMethod.Get, "/api/hello?name=James");
+    httpRequest.Headers.Add(AzureFunctionConstants.FunctionKeyHeaderName, "helloValue");
+    var response = await Fixture.Client.SendAsync(httpRequest);
+    Assert.IsTrue(response.IsSuccessStatusCode);
+}
+```
