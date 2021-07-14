@@ -6,6 +6,7 @@ using AzureFunctions.TestUtils.Extensions;
 using AzureFunctions.TestUtils.Handlers;
 using AzureFunctions.TestUtils.Models;
 using AzureFunctions.TestUtils.Settings;
+using Microsoft.Extensions.Azure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AzureFunctions.TestUtils
@@ -111,12 +112,20 @@ namespace AzureFunctions.TestUtils
                 var enableAuth = currentTest.GetUseFunctionAuth();
                 var queues = currentTest.GetQueues().FirstOrDefault()?.QueueNames;
                 var containers = currentTest.GetBlobContainers().FirstOrDefault()?.ContainerNames;
+                var tables = currentTest.GetTables().FirstOrDefault()?.TableNames;
                 Context.Data.FunctionKeys = functionKeys;
                 Context.Data.FunctionsToRun = functionsToRun;
-                Context.Data.EnableAuth = enableAuth != null;
+                Context.Data.EnableAuth = enableAuth != null && enableAuth.Any();
                 Context.Data.Queues = queues;
                 Context.Data.BlobContainers = containers;
-                Fixture.InitStorage(TestContext);
+                Context.Data.Tables = tables;
+
+                if (Context.Data.Settings.RunAzurite)
+                {
+                    Fixture.InitStorage(TestContext);
+                    Fixture.InitFunctionKeys();
+                }
+
                 Fixture.InitFunctionHost(TestContext);
             }
         }
@@ -137,16 +146,27 @@ namespace AzureFunctions.TestUtils
         protected void TestCleanup()
         {
             Fixture.StopFunctionHost();
-            Fixture.ClearStorage();
-       //     Fixture.StopAzurite();
+
+            if (Context.Data.Settings.RunAzurite)
+            {
+                Fixture.ClearStorage();
+                //     Fixture.StopAzurite();    
+            }
+
             Context.Reset();
         }
 
         private MethodInfo GetCurrentTestMethod()
         {
+            var currentlyRunningClassType = GetCurrentTestClass();
+            return currentlyRunningClassType?.GetMethod(TestContext.TestName);
+        }
+
+        private Type GetCurrentTestClass()
+        {
             var currentlyRunningClassType = GetType().Assembly.GetTypes()
                 .FirstOrDefault(f => f.FullName == TestContext.FullyQualifiedTestClassName);
-            return currentlyRunningClassType?.GetMethod(TestContext.TestName);
+            return currentlyRunningClassType;
         }
 
         #endregion

@@ -30,5 +30,9 @@ namespace AzureFunctions.TestUtils.Extensions
         {
             return methodInfo.GetCustomAttributes<UseBlobContainersAttribute>();
         }
+        public static IEnumerable<UseTablesAttribute> GetTables(this MethodInfo methodInfo)
+        {
+            return methodInfo.GetCustomAttributes<UseTablesAttribute>();
+        }
     }
 }

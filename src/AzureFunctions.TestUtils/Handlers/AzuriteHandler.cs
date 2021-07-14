@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using Azure.Data.Tables;
 using Azure.Storage.Blobs;
 using Azure.Storage.Queues;
 
@@ -12,11 +13,19 @@ namespace AzureFunctions.TestUtils.Handlers
         private readonly object _azuriteLock = new object();
         private readonly BlobServiceClient _blobServiceClient;
         private readonly QueueServiceClient _queueServiceClient;
+        private readonly TableServiceClient _tableServiceClient;
+
+        private readonly string[] _azureDirectories = new[]
+        {
+            "azure-webjobs-secrets",
+            "azure-webjobs-hosts"
+        };
 
         public AzuriteHandler()
         {
             _blobServiceClient = new BlobServiceClient(Context.Data.Settings.StorageConnectionString);
             _queueServiceClient = new QueueServiceClient(Context.Data.Settings.StorageConnectionString);
+            _tableServiceClient = new TableServiceClient(Context.Data.Settings.StorageConnectionString);
         }
 
         private string GetBlobArguments() =>
@@ -75,6 +84,38 @@ namespace AzureFunctions.TestUtils.Handlers
             CreateBlobContainers(Context.Data.BlobContainers);
         }
 
+        #region Blob
+
+        public void CreateBlobContainers(string[] containerNames)
+        {
+            if (containerNames == null || !containerNames.Any()) return;
+            foreach (var container in containerNames)
+            {
+                _blobServiceClient.CreateBlobContainer(container);
+            }
+        }
+
+        public void ClearBlobContainers()
+        {
+            var pages = _blobServiceClient.GetBlobContainers().AsPages();
+            foreach (var page in pages)
+            {
+                foreach (var containerItem in page.Values)
+                {
+                    if (Context.Data.Settings.PersistAzureContainers && _azureDirectories.Contains(containerItem.Name))
+                    {
+                        continue;
+                    }
+
+                    _blobServiceClient.DeleteBlobContainer(containerItem.Name);
+                }
+            }
+        }
+
+        #endregion
+
+        #region Queues
+
         public void ClearQueues()
         {
             var pages = _queueServiceClient.GetQueues().AsPages();
@@ -87,34 +128,42 @@ namespace AzureFunctions.TestUtils.Handlers
             }
         }
 
-        public void ClearBlobContainers()
-        {
-            var pages = _blobServiceClient.GetBlobContainers().AsPages();
-            foreach (var page in pages)
-            {
-                foreach (var queueItem in page.Values)
-                {
-                    _blobServiceClient.DeleteBlobContainer(queueItem.Name);
-                }
-            }
-        }
-
         public void CreateQueues(string[] queueNames)
         {
+            if (queueNames == null || !queueNames.Any()) return;
+
             foreach (var queueName in queueNames)
             {
                 _queueServiceClient.CreateQueue(queueName);
             }
         }
 
-        public void CreateBlobContainers(string[] containerNames)
+        #endregion
+
+        #region Tables
+
+        public void CreateTables(string[] tableNames)
         {
-            foreach (var container in containerNames)
+            if (tableNames == null || !tableNames.Any()) return;
+            foreach (var tableName in tableNames)
             {
-                _blobServiceClient.CreateBlobContainer(container);
+                _tableServiceClient.CreateTable(tableName);
             }
         }
 
+        public void ClearTables()
+        {
+            var pages = _tableServiceClient.Query().AsPages();
+            foreach (var page in pages)
+            {
+                foreach (var tableItem in page.Values)
+                {
+                    _tableServiceClient.DeleteTable(tableItem.Name);
+                }
+            }
+        }
+
+        #endregion
 
         public void Stop()
         {

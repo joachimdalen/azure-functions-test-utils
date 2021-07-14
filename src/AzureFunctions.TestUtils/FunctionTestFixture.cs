@@ -40,12 +40,20 @@ namespace AzureFunctions.TestUtils
 
         private string GetEnableAuthArgument()
         {
-            return Context.Data.EnableAuth ? null : "--enableAuth";
+            return Context.Data.EnableAuth ? "--enableAuth" : null;
         }
 
         public void InitStorage(TestContext testContext)
         {
             AzuriteHandler.InitAzuriteHost();
+        }
+
+        public void InitFunctionKeys()
+        {
+            foreach (var functionKey in Context.Data.FunctionKeys)
+            {
+                KeyHandler.CreateFunctionKey(functionKey.FunctionName, functionKey.Name, functionKey.Value);
+            }
         }
 
         public void InitFunctionHost(TestContext context)

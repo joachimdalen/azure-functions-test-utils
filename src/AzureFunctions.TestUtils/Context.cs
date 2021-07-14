@@ -25,6 +25,7 @@ namespace AzureFunctions.TestUtils
             public bool EnableAuth { get; set; }
             public string[] Queues { get; set; }
             public string[] BlobContainers { get; set; }
+            public string[] Tables { get; set; }
         }
     }
 }
