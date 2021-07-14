@@ -13,6 +13,7 @@ namespace AzureFunctions.TestUtils
     public abstract class FunctionTestClass
     {
         private static readonly ExecutableResolver ExecutableResolver = new ExecutableResolver();
+        private static readonly ConnectionStringHandler ConnectionStringHandler = new ConnectionStringHandler();
         protected static FunctionTestFixture Fixture;
         public TestContext TestContext { get; set; }
 
@@ -28,6 +29,11 @@ namespace AzureFunctions.TestUtils
             if (string.IsNullOrEmpty(settings.DotNetPath))
             {
                 settings.DotNetPath = ExecutableResolver.GetDotNetPath();
+            }
+
+            if (string.IsNullOrEmpty(settings.AzuritePath))
+            {
+                settings.AzuritePath = ExecutableResolver.GetAzuritePath();
             }
 
             if (string.IsNullOrEmpty(settings.FuncHostPath))
@@ -58,20 +64,26 @@ namespace AzureFunctions.TestUtils
                 settings.FuncAppPath = Path.GetFullPath(settings.FuncAppPath);
             }
 
-            if (string.IsNullOrEmpty(settings.StorageConnectionString) && settings.Storage == null)
+            if (string.IsNullOrEmpty(settings.StorageConnectionString) && string.IsNullOrEmpty(settings.AccountKey) &&
+                string.IsNullOrEmpty(settings.AccountName))
             {
                 settings.StorageConnectionString = "UseDevelopmentStorage=true";
             }
             else
             {
-                settings.Storage ??= new StorageSettings();
-                settings.StorageConnectionString = StorageHandler.GetConnectionString(settings.Storage);
+                if (string.IsNullOrEmpty(settings.AccountName) || string.IsNullOrEmpty(settings.AccountKey))
+                {
+                    throw new ArgumentException("Account name and account key must be set");
+                }
+
+                settings.StorageConnectionString = ConnectionStringHandler.GetConnectionString(settings);
             }
 
-
+            var path = Path.Combine(context.TestRunDirectory, "azurite-data");
+            Directory.CreateDirectory(path);
+            settings.DataDirectory = path;
             Context.Data.Settings = settings;
         }
-
 
         protected static void ClassInitialize(TestContext context)
         {
@@ -83,7 +95,6 @@ namespace AzureFunctions.TestUtils
                 Context.Data.IsInitialized = true;
             }
         }
-
 
         protected void TestInitialize()
         {
@@ -98,12 +109,15 @@ namespace AzureFunctions.TestUtils
                 }).ToArray();
                 var functionsToRun = currentTest.GetStartFunctions()?.FirstOrDefault()?.FunctionNames;
                 var enableAuth = currentTest.GetUseFunctionAuth();
-
+                var queues = currentTest.GetQueues().FirstOrDefault()?.QueueNames;
+                var containers = currentTest.GetBlobContainers().FirstOrDefault()?.ContainerNames;
                 Context.Data.FunctionKeys = functionKeys;
                 Context.Data.FunctionsToRun = functionsToRun;
                 Context.Data.EnableAuth = enableAuth != null;
-
-                Fixture.InitHost(TestContext);
+                Context.Data.Queues = queues;
+                Context.Data.BlobContainers = containers;
+                Fixture.InitStorage(TestContext);
+                Fixture.InitFunctionHost(TestContext);
             }
         }
 
@@ -122,7 +136,9 @@ namespace AzureFunctions.TestUtils
 
         protected void TestCleanup()
         {
-            Fixture.StopHost();
+            Fixture.StopFunctionHost();
+            Fixture.ClearStorage();
+       //     Fixture.StopAzurite();
             Context.Reset();
         }
 

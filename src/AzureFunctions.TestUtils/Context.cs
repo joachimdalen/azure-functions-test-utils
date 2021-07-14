@@ -23,6 +23,8 @@ namespace AzureFunctions.TestUtils
             public FunctionKey[] FunctionKeys { get; set; }
             public string[] FunctionsToRun { get; set; }
             public bool EnableAuth { get; set; }
+            public string[] Queues { get; set; }
+            public string[] BlobContainers { get; set; }
         }
     }
 }

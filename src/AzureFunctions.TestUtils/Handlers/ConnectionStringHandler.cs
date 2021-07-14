@@ -2,14 +2,13 @@ using AzureFunctions.TestUtils.Settings;
 
 namespace AzureFunctions.TestUtils.Handlers
 {
-    public static class StorageHandler
+    public class ConnectionStringHandler
     {
-        private static string AccountFormat = "AccountName={0};AccountKey={1};DefaultEndpointsProtocol=http;";
+        private string AccountFormat = "AccountName={0};AccountKey={1};DefaultEndpointsProtocol=http;";
 
-        public static string GetConnectionString(StorageSettings storageSettings)
+        public string GetConnectionString(TestUtilsSettings storageSettings)
         {
             var accountName = storageSettings.AccountName;
-
             var conString = string.Format(AccountFormat, accountName, storageSettings.AccountKey);
             conString += GetPart("BlobEndpoint", storageSettings.BlobPort, accountName);
             conString += GetPart("QueueEndpoint", storageSettings.QueuePort, accountName);
@@ -18,7 +17,7 @@ namespace AzureFunctions.TestUtils.Handlers
             return conString;
         }
 
-        private static string GetPart(string endpoint, int port, string account)
+        private string GetPart(string endpoint, int port, string account)
         {
             return $"{endpoint}=http://127.0.0.1:{port}/{account};";
         }

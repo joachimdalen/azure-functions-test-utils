@@ -13,11 +13,6 @@ namespace SampleFunctions.IntegrationTests
             var settings = new TestUtilsSettings
             {
                 FuncAppPath = "../../../../SampleFunctions/bin/Debug/netcoreapp3.1",
-                Storage = new StorageSettings
-                {
-                    AccountKey = "account1",
-                    AccountName = "key1"
-                }
             };
             AssemblyInitialize(context, settings);
         }

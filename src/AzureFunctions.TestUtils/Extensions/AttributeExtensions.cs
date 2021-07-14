@@ -20,5 +20,15 @@ namespace AzureFunctions.TestUtils.Extensions
         {
             return methodInfo.GetCustomAttributes<StartFunctionsAttribute>();
         }
+
+        public static IEnumerable<UseQueuesAttribute> GetQueues(this MethodInfo methodInfo)
+        {
+            return methodInfo.GetCustomAttributes<UseQueuesAttribute>();
+        }
+
+        public static IEnumerable<UseBlobContainersAttribute> GetBlobContainers(this MethodInfo methodInfo)
+        {
+            return methodInfo.GetCustomAttributes<UseBlobContainersAttribute>();
+        }
     }
 }

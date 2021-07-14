@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
-using System.Threading.Tasks;
 using AzureFunctions.TestUtils.Handlers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -13,18 +11,20 @@ namespace AzureFunctions.TestUtils
     public sealed class FunctionTestFixture : IDisposable
     {
         private readonly object _functionLock = new object();
-        private Process _funcHostProcess;
+        private readonly AzuriteHandler AzuriteHandler;
         private FunctionKeyHandler KeyHandler = new FunctionKeyHandler();
+        private Process _funcHostProcess;
         public readonly HttpClient Client = new HttpClient();
 
         public FunctionTestFixture()
         {
             Client.BaseAddress = new Uri($"http://localhost:{Context.Data.Settings.FuncHostPort}");
+            AzuriteHandler = new AzuriteHandler();
         }
 
         public void Dispose()
         {
-            StopHost();
+            StopFunctionHost();
         }
 
 
@@ -43,10 +43,13 @@ namespace AzureFunctions.TestUtils
             return Context.Data.EnableAuth ? null : "--enableAuth";
         }
 
-        public void InitHost(TestContext context)
+        public void InitStorage(TestContext testContext)
         {
-            StopHost();
+            AzuriteHandler.InitAzuriteHost();
+        }
 
+        public void InitFunctionHost(TestContext context)
+        {
             var dotnetExePath = Context.Data.Settings.DotNetPath;
             var functionHostPath = Context.Data.Settings.FuncHostPath;
             var functionAppFolder = Context.Data.Settings.FuncAppPath;
@@ -99,7 +102,7 @@ namespace AzureFunctions.TestUtils
             // }));
         }
 
-        public void StopHost()
+        public void StopFunctionHost()
         {
             lock (_functionLock)
             {
@@ -112,6 +115,17 @@ namespace AzureFunctions.TestUtils
                 _funcHostProcess.Dispose();
                 _funcHostProcess = null;
             }
+        }
+
+        public void ClearStorage()
+        {
+            AzuriteHandler.ClearQueues();
+            AzuriteHandler.ClearBlobContainers();
+        }
+
+        public void StopAzurite()
+        {
+            AzuriteHandler.Stop();
         }
     }
 }

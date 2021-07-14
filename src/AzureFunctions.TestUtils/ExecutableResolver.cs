@@ -26,7 +26,7 @@ namespace AzureFunctions.TestUtils
 
             if (process.ExitCode != 0)
             {
-                throw new Exception("Failed to lookup tool");
+                throw new Exception($"Failed to lookup tool {executable}");
             }
 
             return process.StandardOutput.ReadToEnd();
@@ -59,6 +59,12 @@ namespace AzureFunctions.TestUtils
             return path;
         }
 
-        public string GetFunctionHostPath() => GetToolFromLookup("func");
+        public string GetFunctionHostPath()
+        {
+            var tools = GetToolFromLookup("func");
+            return tools;
+        }
+
+        public string GetAzuritePath() => GetToolFromLookup("azurite");
     }
 }
