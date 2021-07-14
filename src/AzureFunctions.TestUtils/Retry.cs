@@ -5,14 +5,16 @@ namespace AzureFunctions.TestUtils
 {
     public static class Retry
     {
-        public static async Task Try(Func<Task> action)
+        public static async Task Try(Func<Task<bool>> action)
         {
             var maxCount = 10;
             while (true)
             {
                 try
                 {
-                    await action();
+                    var result = await action();
+                    if (result) return;
+
                 }
                 catch (Exception e)
                 {

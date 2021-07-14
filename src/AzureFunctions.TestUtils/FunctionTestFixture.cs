@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using AzureFunctions.TestUtils.Handlers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -101,13 +103,12 @@ namespace AzureFunctions.TestUtils
 
         private void WaitForHostStart()
         {
-            Thread.Sleep(5000);
-            // Task.Run(async () => await Retry.Try(async () =>
-            // {
-            //     var response = await Client.GetAsync("/admin/host/status");
-            //     if (!response.IsSuccessStatusCode) throw new Exception();
-            //     return;
-            // }));
+            Task.Run(async () => await Retry.Try(async () =>
+            {
+                var response = await Client.GetAsync("/admin/host/ping");
+                if (!response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.Unauthorized) throw new Exception();
+                return true;
+            })).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         public void StopFunctionHost()
