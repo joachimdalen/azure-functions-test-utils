@@ -116,3 +116,20 @@ public async Task GetHello_Key_ReturnsOk()
     Assert.IsTrue(response.IsSuccessStatusCode);
 }
 ```
+### Storage
+When running Azurite, you can also initialize the emaulator with Blob Containers, Queues and Tables. 
+
+```csharp
+[TestMethod]
+[StartFunctions(nameof(CreateOrder), nameof(SendOrderConfirmation))]
+[UseQueues("orders")]
+[UseBlobContainers("order-confirmations")]
+public async Task CreateOrder_Sends_Confirmation()
+{
+    var response = await Fixture.Client.PostAsync("/api/orders", new StringContent(""));
+    await Task.Delay(5000); // Wait for message to be sent on queue
+    
+    Assert.IsTrue(response.IsSuccessStatusCode);
+    // Verify something else
+}
+```
