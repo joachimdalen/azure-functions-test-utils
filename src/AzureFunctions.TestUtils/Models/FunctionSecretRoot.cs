@@ -4,6 +4,14 @@ namespace AzureFunctions.TestUtils.Models
 {
     public class FunctionSecretRoot
     {
+        public FunctionSecretRoot()
+        {
+            HostName = "localhost:7071";
+            InstanceId = "some-instance";
+            Source = "runtime";
+            DecryptionKeyId = "";
+        }
+
         [JsonProperty("masterKey", NullValueHandling = NullValueHandling.Ignore)]
         public FunctionSecret MasterKey { get; set; }
 

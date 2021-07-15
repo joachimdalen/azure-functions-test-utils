@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using AzureFunctions.TestUtils.Handlers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -13,22 +12,25 @@ namespace AzureFunctions.TestUtils
     public sealed class FunctionTestFixture : IDisposable
     {
         private readonly object _functionLock = new object();
-        private readonly AzuriteHandler AzuriteHandler;
-        private FunctionKeyHandler KeyHandler = new FunctionKeyHandler();
+        private readonly AzuriteHandler _azuriteHandler;
+        private readonly FunctionKeyHandler _keyHandler;
         private Process _funcHostProcess;
         public readonly HttpClient Client = new HttpClient();
 
         public FunctionTestFixture()
         {
             Client.BaseAddress = new Uri($"http://localhost:{Context.Data.Settings.FuncHostPort}");
-            AzuriteHandler = new AzuriteHandler();
+            _azuriteHandler = new AzuriteHandler();
+            _keyHandler = new FunctionKeyHandler();
         }
 
         public void Dispose()
         {
             StopFunctionHost();
+            StopAzurite();
         }
 
+        #region Function Host
 
         private string GetRunFunctionsArgument()
         {
@@ -45,16 +47,11 @@ namespace AzureFunctions.TestUtils
             return Context.Data.EnableAuth ? "--enableAuth" : null;
         }
 
-        public void InitStorage(TestContext testContext)
-        {
-            AzuriteHandler.InitAzuriteHost();
-        }
-
         public void InitFunctionKeys()
         {
             foreach (var functionKey in Context.Data.FunctionKeys)
             {
-                KeyHandler.CreateFunctionKey(functionKey.FunctionName, functionKey.Name, functionKey.Value);
+                _keyHandler.CreateFunctionKey(functionKey.FunctionName, functionKey.Name, functionKey.Value);
             }
         }
 
@@ -106,7 +103,8 @@ namespace AzureFunctions.TestUtils
             Task.Run(async () => await Retry.Try(async () =>
             {
                 var response = await Client.GetAsync("/admin/host/ping");
-                if (!response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.Unauthorized) throw new Exception();
+                if (!response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.Unauthorized)
+                    throw new Exception();
                 return true;
             })).ConfigureAwait(false).GetAwaiter().GetResult();
         }
@@ -126,15 +124,21 @@ namespace AzureFunctions.TestUtils
             }
         }
 
+        #endregion
+
+
+        #region Azurite
+
+        public void InitStorage() => _azuriteHandler.InitAzuriteHost();
+
         public void ClearStorage()
         {
-            AzuriteHandler.ClearQueues();
-            AzuriteHandler.ClearBlobContainers();
+            _azuriteHandler.ClearQueues();
+            _azuriteHandler.ClearBlobContainers();
         }
 
-        public void StopAzurite()
-        {
-            AzuriteHandler.Stop();
-        }
+        public void StopAzurite() => _azuriteHandler.Stop();
+
+        #endregion
     }
 }

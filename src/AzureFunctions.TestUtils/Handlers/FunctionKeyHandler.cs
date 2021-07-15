@@ -16,8 +16,6 @@ namespace AzureFunctions.TestUtils.Handlers
 
         public FunctionKeyHandler()
         {
-            var blobPath = $"{BlobContainerName}";
-            var host = GetFunctionHostId();
             var blobServiceClient = new BlobServiceClient(Context.Data.Settings.StorageConnectionString);
             _blobContainerClient = blobServiceClient.GetBlobContainerClient(BlobContainerName);
             _blobContainerClient.CreateIfNotExists();
@@ -40,10 +38,6 @@ namespace AzureFunctions.TestUtils.Handlers
                         Value = value,
                     }
                 },
-                HostName = "localhost:7071",
-                InstanceId = "some-instance",
-                Source = "runtime",
-                DecryptionKeyId = ""
             };
 
             var jsonContent = JsonConvert.SerializeObject(model);

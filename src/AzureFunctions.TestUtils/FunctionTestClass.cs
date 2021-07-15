@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -122,7 +122,7 @@ namespace AzureFunctions.TestUtils
 
                 if (Context.Data.Settings.RunAzurite)
                 {
-                    Fixture.InitStorage(TestContext);
+                    Fixture.InitStorage();
                     Fixture.InitFunctionKeys();
                 }
 
