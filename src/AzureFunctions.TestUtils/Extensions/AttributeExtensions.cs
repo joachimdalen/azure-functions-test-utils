@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using AzureFunctions.TestUtils.Attributes;
 
@@ -8,12 +10,17 @@ namespace AzureFunctions.TestUtils.Extensions
     {
         public static IEnumerable<UseFunctionKeyAttribute> GetFunctionKeys(this MethodInfo methodInfo)
         {
-            return methodInfo.GetCustomAttributes<UseFunctionKeyAttribute>();
-        }
+            return GetMethodOrClassAttributes<UseFunctionKeyAttribute>(methodInfo);
+            }
 
         public static IEnumerable<UseFunctionAuthAttribute> GetUseFunctionAuth(this MethodInfo methodInfo)
         {
-            return methodInfo.GetCustomAttributes<UseFunctionAuthAttribute>();
+            return GetMethodOrClassAttributes<UseFunctionAuthAttribute>(methodInfo);
+        }
+        
+        public static IEnumerable<UseAzuriteAttribute> GetUseAzurite(this MethodInfo methodInfo)
+        {
+            return GetMethodOrClassAttributes<UseAzuriteAttribute>(methodInfo);
         }
 
         public static IEnumerable<StartFunctionsAttribute> GetStartFunctions(this MethodInfo methodInfo)
@@ -30,9 +37,24 @@ namespace AzureFunctions.TestUtils.Extensions
         {
             return methodInfo.GetCustomAttributes<UseBlobContainersAttribute>();
         }
+
         public static IEnumerable<UseTablesAttribute> GetTables(this MethodInfo methodInfo)
         {
             return methodInfo.GetCustomAttributes<UseTablesAttribute>();
+        }
+
+        private static IEnumerable<T> GetMethodOrClassAttributes<T>(this MethodInfo methodInfo) where T : Attribute
+        {
+            var methodAttributes = methodInfo.GetCustomAttributes<T>()?.ToArray();
+
+            if (methodAttributes.Any()) return methodAttributes;
+
+            if (methodInfo.DeclaringType != null)
+            {
+                return methodInfo.DeclaringType.GetCustomAttributes<T>();
+            }
+
+            return Array.Empty<T>();
         }
     }
 }

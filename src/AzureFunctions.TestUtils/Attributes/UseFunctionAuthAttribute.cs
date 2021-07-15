@@ -2,7 +2,7 @@
 
 namespace AzureFunctions.TestUtils.Attributes
 {
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class UseFunctionAuthAttribute : Attribute
     {
     }

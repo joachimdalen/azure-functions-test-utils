@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -109,13 +109,13 @@ namespace AzureFunctions.TestUtils
                     Value = x.Value
                 }).ToArray();
                 var functionsToRun = currentTest.GetStartFunctions()?.FirstOrDefault()?.FunctionNames;
-                var enableAuth = currentTest.GetUseFunctionAuth();
+                var enableAuth = currentTest.GetUseFunctionAuth().Any();
                 var queues = currentTest.GetQueues().FirstOrDefault()?.QueueNames;
                 var containers = currentTest.GetBlobContainers().FirstOrDefault()?.ContainerNames;
                 var tables = currentTest.GetTables().FirstOrDefault()?.TableNames;
                 Context.Data.FunctionKeys = functionKeys;
                 Context.Data.FunctionsToRun = functionsToRun;
-                Context.Data.EnableAuth = enableAuth != null && enableAuth.Any();
+                Context.Data.EnableAuth = enableAuth;
                 Context.Data.Queues = queues;
                 Context.Data.BlobContainers = containers;
                 Context.Data.Tables = tables;
