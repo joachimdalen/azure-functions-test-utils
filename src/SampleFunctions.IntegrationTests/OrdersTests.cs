@@ -1,7 +1,5 @@
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
-using Azure.Storage.Blobs;
 using AzureFunctions.TestUtils.Asserts;
 using AzureFunctions.TestUtils.Attributes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -33,7 +31,7 @@ namespace SampleFunctions.IntegrationTests
         [StartFunctions(nameof(CreateOrder))]
         [UseQueues("orders")]
         [UseBlobContainers("order-confirmations")]
-        public async Task CreateOrder_Input_AddsMessageToQueue()
+        public async Task CreateOrder_Input_AddsSingleMessageToQueue()
         {
             var response = await Fixture.Client.PostAsync("/api/orders", new StringContent(""));
             Assert.IsTrue(response.IsSuccessStatusCode);
@@ -41,6 +39,25 @@ namespace SampleFunctions.IntegrationTests
             await Task.Delay(5000);
 
             Assert.That.QueueHasMessageCount("UseDevelopmentStorage=true", "orders", 1);
+        }
+
+        [TestMethod]
+        [StartFunctions(nameof(CreateOrder))]
+        [UseQueues("orders")]
+        [UseBlobContainers("order-confirmations")]
+        public async Task CreateOrder_Input_AddsMessageToQueue()
+        {
+            var response = await Fixture.Client.PostAsync("/api/orders", new StringContent(""));
+            Assert.IsTrue(response.IsSuccessStatusCode);
+
+            await Task.Delay(5000);
+
+            Assert.That.QueueHasMessage<Order>("orders", x => x.OrderId == 1);
+        }
+
+        private class Order
+        {
+            public int OrderId { get; set; }
         }
     }
 }
