@@ -2,7 +2,6 @@
 
 > MSTest wrapper for Azure Functions Core Tools for easy bootstrapping of integration tests.
 
-
 Currently under development to make things work together. When all the intial functionality is in place, a refactor will be done to clean some things up.
 
 ## Getting started
@@ -116,8 +115,10 @@ public async Task GetHello_Key_ReturnsOk()
     Assert.IsTrue(response.IsSuccessStatusCode);
 }
 ```
+
 ### Storage
-When running Azurite, you can also initialize the emaulator with Blob Containers, Queues and Tables. 
+
+When running Azurite, you can also initialize the emaulator with Blob Containers, Queues and Tables.
 
 ```csharp
 [TestMethod]
@@ -128,8 +129,18 @@ public async Task CreateOrder_Sends_Confirmation()
 {
     var response = await Fixture.Client.PostAsync("/api/orders", new StringContent(""));
     await Task.Delay(5000); // Wait for message to be sent on queue
-    
+
     Assert.IsTrue(response.IsSuccessStatusCode);
     // Verify something else
 }
 ```
+
+### Custom Asserts
+
+| Area  | Assert               | Description                                                                 |
+| ----- | -------------------- | --------------------------------------------------------------------------- |
+| Blob  | BlobExists           | Assert that a given blob item exists in the container                       |
+| Blob  | ContainerExists      | Assert that a blob container exists                                         |
+| Queue | QueueIsEmpty         | Assert that the given queue does not contain any messages                   |
+| Queue | QueueHasMessageCount | Assert that the given queue contains the given amount of messages           |
+| Queue | QueueHasMessage      | Assert that the queue contains at least one message matching the expression |
