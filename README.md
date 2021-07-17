@@ -100,13 +100,13 @@ public async Task GetOrderItems_Returns_Ok()
 
 ### Authorization
 
-By default function authorization is not enabled when running locally. This can be enabled by adding the attribute `UseFunctionAuth`. Function and host keys can be pre generated using the attributes `UseFunctionKey` and `UseHostKey`.
+By default function authorization is not enabled when running locally. This can be enabled by adding the attribute `UseFunctionAuth`. Function and host keys can be pre generated using the attributes `UseFunctionKey`.
 
 ```csharp
 [TestMethod]
 [UseFunctionAuth]
 [StartFunctions(nameof(GetHello))]
-[UseFunctionKey(nameof(GetHello), "main", "helloValue")]
+[UseFunctionKey(FunctionAuthLevel.Function, "main", nameof(GetHello), "helloValue")]
 public async Task GetHello_Key_ReturnsOk()
 {
     var httpRequest = new HttpRequestMessage(HttpMethod.Get, "/api/hello?name=James");
@@ -116,9 +116,33 @@ public async Task GetHello_Key_ReturnsOk()
 }
 ```
 
+**Scoped function key**
+
+```csharp
+[UseFunctionKey(FunctionAuthLevel.Function, "main", nameof(GetHello), "value1")]
+```
+
+**Global function key**
+
+```csharp
+[UseFunctionKey(FunctionAuthLevel.Function, "global-key", "value1")]
+```
+
+**Master key**
+
+```csharp
+[UseFunctionKey(FunctionAuthLevel.Admin, "ignored-value", "value1")]
+```
+
+**System key**
+
+```csharp
+[UseFunctionKey(FunctionAuthLevel.System, "system-key", "value1")]
+```
+
 ### Storage
 
-When running Azurite, you can also initialize the emaulator with Blob Containers, Queues and Tables.
+When running Azurite, you can also initialize the emulator with Blob Containers, Queues and Tables.
 
 ```csharp
 [TestMethod]
@@ -131,7 +155,7 @@ public async Task CreateOrder_Sends_Confirmation()
     await Task.Delay(5000); // Wait for message to be sent on queue
 
     Assert.IsTrue(response.IsSuccessStatusCode);
-    // Verify something else
+    Assert.That.BlobExists("UseDevelopmentStorage=true", "order-confirmations", "order-1.json");
 }
 ```
 
