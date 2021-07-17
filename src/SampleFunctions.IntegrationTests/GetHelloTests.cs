@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using AzureFunctions.TestUtils;
 using AzureFunctions.TestUtils.Attributes;
+using AzureFunctions.TestUtils.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SampleFunctions.Functions;
 
@@ -32,7 +33,7 @@ namespace SampleFunctions.IntegrationTests
         [TestMethod]
         [UseFunctionAuth]
         [StartFunctions(nameof(GetHello))]
-        [UseFunctionKey(nameof(GetHello), "main", "helloValue")]
+        [UseFunctionKey(FunctionAuthLevel.Function, "main", nameof(GetHello), "helloValue")]
         public async Task GetHello_Key_ReturnsOk()
         {
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, "/api/hello?name=James");

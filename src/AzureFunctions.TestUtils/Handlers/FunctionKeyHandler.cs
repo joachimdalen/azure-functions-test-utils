@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using Azure.Storage.Blobs;
 using AzureFunctions.TestUtils.Models;
@@ -21,37 +21,43 @@ namespace AzureFunctions.TestUtils.Handlers
             _blobContainerClient.CreateIfNotExists();
         }
 
-        public void CreateFunctionKey(string function, string keyName, string value)
-        {
-            var path = Path.Join(GetFunctionHostId(), $"{function.ToLower()}.json");
-
-            _blobContainerClient.DeleteBlobIfExists(path);
-
-            var model = new FunctionSecretRoot
-            {
-                Keys = new[]
-                {
-                    new FunctionSecret
-                    {
-                        Encrypted = false,
-                        Name = keyName,
-                        Value = value,
-                    }
-                },
-            };
-
-            var jsonContent = JsonConvert.SerializeObject(model);
-
-            using var ms = new MemoryStream(Encoding.UTF8.GetBytes(jsonContent));
-            _blobContainerClient.UploadBlob(path, ms);
-        }
-
         public string CreateHostKey(string keyName, string value)
         {
+            var path = Path.Join(GetFunctionHostId(), "host.json");
+            var client = _blobContainerClient.GetBlobClient(path);
+            FunctionSecretRoot root;
+            if (client.Exists())
+            {
+                var blob = client.DownloadContent();
+                var text = Encoding.UTF8.GetString(blob.Value.Content);
+                root = JsonConvert.DeserializeObject<FunctionSecretRoot>(text);
+            }
+            else
+            {
+                root = new FunctionSecretRoot
+                {
+                    MasterKey = new FunctionSecret(),
+                    FunctionKeys = new[] {new FunctionSecret()}
+                };
+            }
+
             return "";
         }
 
         #region Helpers
+
+        private static string GenerateSecret()
+        {
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                byte[] data = new byte[40];
+                rng.GetBytes(data);
+                string secret = Convert.ToBase64String(data);
+
+                // Replace pluses as they are problematic as URL values
+                return secret.Replace('+', 'a');
+            }
+        }
 
         private static int GetStableHash(string value)
         {
@@ -88,5 +94,80 @@ namespace AzureFunctions.TestUtils.Handlers
         }
 
         #endregion
+
+        private void CreateFunctionKeys(string function, FunctionKey[] keys)
+        {
+            var path = Path.Join(GetFunctionHostId(), $"{function.ToLower()}.json");
+
+            _blobContainerClient.DeleteBlobIfExists(path);
+
+            var secrets = keys.Select(x => new FunctionSecret
+            {
+                Name = x.Name,
+                Value = x.Value ?? GenerateSecret(),
+            }).ToArray();
+
+            var model = new FunctionSecretRoot
+            {
+                Keys = secrets
+            };
+
+            var jsonContent = JsonConvert.SerializeObject(model, Formatting.Indented);
+            using var ms = new MemoryStream(Encoding.UTF8.GetBytes(jsonContent));
+            _blobContainerClient.UploadBlob(path, ms);
+        }
+
+        public void CreateFunctionKeys(FunctionKey[] functionKeys)
+        {
+            var functionNames = functionKeys.Select(x => x.FunctionName).Distinct();
+
+            foreach (var functionName in functionNames)
+            {
+                var secrets = functionKeys.Where(x => x.FunctionName == functionName).ToArray();
+                CreateFunctionKeys(functionName, secrets);
+            }
+        }
+
+        public void CreateHostKeys(FunctionKey[] hostKeys)
+        {
+            var masterKey = hostKeys.FirstOrDefault(x => x.Scope == FunctionAuthLevel.Admin);
+            var functionKeys = hostKeys.Where(x =>
+                x.Scope == FunctionAuthLevel.Function && string.IsNullOrEmpty(x.FunctionName));
+            var systemKeys = hostKeys.Where(x => x.Scope == FunctionAuthLevel.System);
+            var path = Path.Join(GetFunctionHostId(), "host.json");
+            var client = _blobContainerClient.GetBlobClient(path);
+            FunctionSecretRoot root;
+            if (client.Exists())
+            {
+                var blob = client.DownloadContent();
+                var text = Encoding.UTF8.GetString(blob.Value.Content);
+                root = JsonConvert.DeserializeObject<FunctionSecretRoot>(text);
+            }
+            else
+            {
+                root = new FunctionSecretRoot
+                {
+                    MasterKey = new FunctionSecret
+                    {
+                        Name = "_master",
+                        Value = masterKey?.Value ?? GenerateSecret()
+                    },
+                    FunctionKeys = functionKeys.Select(x => new FunctionSecret
+                    {
+                        Name = x.Name,
+                        Value = x.Value ?? GenerateSecret()
+                    }).ToArray(),
+                    SystemKeys = systemKeys.Select(x => new FunctionSecret
+                    {
+                        Name = x.Name,
+                        Value = x.Value ?? GenerateSecret()
+                    }).ToArray(),
+                };
+            }
+
+            var jsonContent = JsonConvert.SerializeObject(root, Formatting.Indented);
+            using var ms = new MemoryStream(Encoding.UTF8.GetBytes(jsonContent));
+            _blobContainerClient.UploadBlob(path, ms);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -106,8 +107,9 @@ namespace AzureFunctions.TestUtils
                 {
                     FunctionName = x.FunctionName,
                     Name = x.Name,
-                    Value = x.Value
-                }).ToArray();
+                    Value = x.Value,
+                    Scope = x.AuthLevel
+                }).ToArray() ?? Array.Empty<FunctionKey>();
                 var functionsToRun = currentTest.GetStartFunctions()?.FirstOrDefault()?.FunctionNames;
                 var enableAuth = currentTest.GetUseFunctionAuth().Any();
                 var queues = currentTest.GetQueues().FirstOrDefault()?.QueueNames;

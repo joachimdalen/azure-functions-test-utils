@@ -11,13 +11,13 @@ namespace AzureFunctions.TestUtils.Extensions
         public static IEnumerable<UseFunctionKeyAttribute> GetFunctionKeys(this MethodInfo methodInfo)
         {
             return GetMethodOrClassAttributes<UseFunctionKeyAttribute>(methodInfo);
-            }
+        }
 
         public static IEnumerable<UseFunctionAuthAttribute> GetUseFunctionAuth(this MethodInfo methodInfo)
         {
             return GetMethodOrClassAttributes<UseFunctionAuthAttribute>(methodInfo);
         }
-        
+
         public static IEnumerable<UseAzuriteAttribute> GetUseAzurite(this MethodInfo methodInfo)
         {
             return GetMethodOrClassAttributes<UseAzuriteAttribute>(methodInfo);

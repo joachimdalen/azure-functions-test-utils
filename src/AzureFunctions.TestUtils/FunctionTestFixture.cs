@@ -1,10 +1,11 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using AzureFunctions.TestUtils.Handlers;
+using AzureFunctions.TestUtils.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AzureFunctions.TestUtils
@@ -49,10 +50,14 @@ namespace AzureFunctions.TestUtils
 
         public void InitFunctionKeys()
         {
-            foreach (var functionKey in Context.Data.FunctionKeys)
-            {
-                _keyHandler.CreateFunctionKey(functionKey.FunctionName, functionKey.Name, functionKey.Value);
-            }
+            var functionKeys = Context.Data.FunctionKeys?.Where(functionKey =>
+                    functionKey.Scope == FunctionAuthLevel.Function && !string.IsNullOrEmpty(functionKey.FunctionName))
+                .ToArray();
+            var hostKeys =
+                Context.Data.FunctionKeys?.Where(functionKey => string.IsNullOrEmpty(functionKey.FunctionName))
+                    .ToArray();
+            _keyHandler.CreateFunctionKeys(functionKeys);
+            _keyHandler.CreateHostKeys(hostKeys);
         }
 
         public void InitFunctionHost(TestContext context)
@@ -70,9 +75,6 @@ namespace AzureFunctions.TestUtils
                 GetRunFunctionsArgument(),
                 GetEnableAuthArgument()
             }.Where(x => !string.IsNullOrEmpty(x)).ToArray();
-
-
-            context.WriteLine(string.Join(" ", arguments));
 
             lock (_functionLock)
             {

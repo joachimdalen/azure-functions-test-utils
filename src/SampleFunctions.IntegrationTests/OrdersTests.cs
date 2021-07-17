@@ -2,6 +2,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using AzureFunctions.TestUtils.Asserts;
 using AzureFunctions.TestUtils.Attributes;
+using AzureFunctions.TestUtils.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SampleFunctions.Functions;
 
@@ -11,12 +12,17 @@ namespace SampleFunctions.IntegrationTests
     public class OrdersTests : BaseFunctionTest
     {
         [TestMethod]
+        [UseFunctionAuth]
         [StartFunctions(nameof(CreateOrder), nameof(SendOrderConfirmation))]
         [UseQueues("orders")]
         [UseBlobContainers("order-confirmations")]
+        [UseFunctionKey(FunctionAuthLevel.Function, "main", nameof(GetHello), "value1")]
+        [UseFunctionKey(FunctionAuthLevel.Admin, "hhh", "master-key-value")]
+        [UseFunctionKey(FunctionAuthLevel.System, "global-system-key", "global-system-key-value")]
         public async Task CreateOrder_Sends_Confirmation()
         {
-            var response = await Fixture.Client.PostAsync("/api/orders", new StringContent(""));
+            var response =
+                await Fixture.Client.PostAsync("/api/orders?code=global-system-key-value", new StringContent(""));
             Assert.IsTrue(response.IsSuccessStatusCode);
 
             await Task.Delay(5000);
