@@ -2,7 +2,7 @@
 
 namespace AzureFunctions.TestUtils.Attributes
 {
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class UseFunctionKeyAttribute : Attribute
     {
         /// <summary>
