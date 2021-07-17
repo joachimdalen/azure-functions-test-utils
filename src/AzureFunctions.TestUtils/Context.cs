@@ -10,6 +10,9 @@ namespace AzureFunctions.TestUtils
             _context.EnableAuth = false;
             _context.FunctionKeys = null;
             _context.FunctionsToRun = null;
+            _context.Queues = null;
+            _context.BlobContainers = null;
+            _context.Tables = null;
         }
 
         private static ContextData _context { get; set; }

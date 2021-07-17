@@ -82,6 +82,7 @@ namespace AzureFunctions.TestUtils.Handlers
 
             CreateQueues(Context.Data.Queues);
             CreateBlobContainers(Context.Data.BlobContainers);
+            CreateTables(Context.Data.Tables);
         }
 
         #region Blob
@@ -147,7 +148,7 @@ namespace AzureFunctions.TestUtils.Handlers
             if (tableNames == null || !tableNames.Any()) return;
             foreach (var tableName in tableNames)
             {
-                _tableServiceClient.CreateTable(tableName);
+                _tableServiceClient.CreateTableIfNotExists(tableName);
             }
         }
 

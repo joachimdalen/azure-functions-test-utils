@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -135,6 +135,7 @@ namespace AzureFunctions.TestUtils
         {
             _azuriteHandler.ClearQueues();
             _azuriteHandler.ClearBlobContainers();
+            _azuriteHandler.ClearTables();
         }
 
         public void StopAzurite() => _azuriteHandler.Stop();
