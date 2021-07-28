@@ -39,10 +39,10 @@ namespace AzureFunctions.TestUtils
             if (string.IsNullOrEmpty(settings.FuncHostPath))
             {
                 settings.FuncHostPath = ExecutableResolver.GetFunctionHostPath();
-                if (!File.Exists(settings.FuncHostPath))
-                {
-                    throw new Exception($"FuncHostPath must be the full path, including func.dll. Currently {settings.FuncHostPath}");
-                }
+                // if (!File.Exists(settings.FuncHostPath))
+                // {
+                //     throw new Exception($"FuncHostPath must be the full path, including func.dll. Currently {settings.FuncHostPath}");
+                // }
             }
 
             if (string.IsNullOrEmpty(settings.FuncAppPath))
