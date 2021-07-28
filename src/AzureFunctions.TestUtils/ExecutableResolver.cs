@@ -62,7 +62,7 @@ namespace AzureFunctions.TestUtils
             if (OperatingSystem.IsLinux())
             {
                 var tool = GetToolFromLookup("func");
-                var resolvedPath = tool.Replace("bin/func", "lib/node_modules/azure-functions-core-tools/bin/func");
+                var resolvedPath = tool.Replace("bin/func", "lib/node_modules/azure-functions-core-tools/bin/func.dll");
                 return resolvedPath;
             }
 

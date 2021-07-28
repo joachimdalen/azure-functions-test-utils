@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -7,7 +6,6 @@ using AzureFunctions.TestUtils.Extensions;
 using AzureFunctions.TestUtils.Handlers;
 using AzureFunctions.TestUtils.Models;
 using AzureFunctions.TestUtils.Settings;
-using Microsoft.Extensions.Azure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AzureFunctions.TestUtils
@@ -40,19 +38,10 @@ namespace AzureFunctions.TestUtils
 
             if (string.IsNullOrEmpty(settings.FuncHostPath))
             {
-                settings.FuncHostPath = ExecutableResolver.GetFunctionHostPath() + ".dll";
-
-                if (!settings.FuncHostPath.EndsWith("func.dll"))
-                {
-                    if (settings.FuncHostPath.EndsWith("/"))
-                        settings.FuncHostPath += "func.dll";
-                    else
-                        settings.FuncHostPath += "/func.dll";
-                }
-
+                settings.FuncHostPath = ExecutableResolver.GetFunctionHostPath();
                 if (!File.Exists(settings.FuncHostPath))
                 {
-                    throw new Exception("FuncAppPath must be the full path, including func.dll");
+                    throw new Exception($"FuncHostPath must be the full path, including func.dll. Currently {settings.FuncHostPath}");
                 }
             }
 
