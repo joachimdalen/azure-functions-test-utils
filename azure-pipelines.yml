@@ -1,0 +1,50 @@
+trigger: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  BUILD_CONFIGURATION: 'Debug'
+
+stages:
+  - stage: buildAndTest
+    displayName: 'Build & Test'
+    jobs: 
+      - job: 'Build'
+        displayName: 'Build job'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: NodeTool@0
+            displayName: 'Install nodeJS'
+            inputs:
+              versionSpec: "13.x"
+              checkLatest: true
+          - task: Bash@3
+            displayName: "Install Azurite"
+            inputs:
+              targetType: inline
+              script: npm i -g azurite
+          - task: Bash@3
+            displayName: "Install Core Tools"
+            inputs:
+              targetType: inline
+              script: npm i -g azure-functions-core-tools@3
+          - task: DotNetCoreCLI@2
+            displayName: 'Restore project dependencies'
+            inputs:
+              command: 'restore'
+              projects: '**/*.csproj'
+          - task: DotNetCoreCLI@2
+            displayName: 'Build the project - $(BUILD_CONFIGURATION)'
+            inputs:
+              command: 'build'
+              arguments: '--no-restore --configuration $(BUILD_CONFIGURATION)'
+              projects: '**/*.csproj'
+          - task: DotNetCoreCLI@2
+            displayName: 'Run Tests'
+            inputs:
+              command: 'test'
+              projects: '**/*Tests/*IntegrationTests.csproj'
+              arguments: '--configuration $(BUILD_CONFIGURATION)  --collect "Code coverage"'
+ 

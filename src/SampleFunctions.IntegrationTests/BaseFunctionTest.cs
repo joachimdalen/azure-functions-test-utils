@@ -1,4 +1,4 @@
-﻿using AzureFunctions.TestUtils;
+using AzureFunctions.TestUtils;
 using AzureFunctions.TestUtils.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -13,6 +13,7 @@ namespace SampleFunctions.IntegrationTests
             var settings = new TestUtilsSettings
             {
                 FuncAppPath = "../../../../SampleFunctions/bin/Debug/netcoreapp3.1",
+                RunAzurite = true,
             };
             AssemblyInitialize(context, settings);
         }
