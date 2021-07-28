@@ -63,19 +63,18 @@ namespace AzureFunctions.TestUtils.Handlers
                 },
             };
 
-            /*var success = _azuriteProcess.Start();
+            var success = _azuriteProcess.Start();
             if (!success)
             {
                 throw new InvalidOperationException("Could not start Azurite host.");
             }
 
-            var error = _azuriteProcess.StandardError.ReadToEnd();
-            var output = _azuriteProcess.StandardOutput.ReadToEnd();
-
             if (_azuriteProcess.HasExited)
             {
-                throw new Exception("Failed to start azurite");
-            }*/
+                var error = _azuriteProcess.StandardError.ReadToEnd();
+                var output = _azuriteProcess.StandardOutput.ReadToEnd();
+                throw new Exception($"Failed to start Azurite. Out: {output} ; Error: {error}");
+            }
 
 
             //WaitForHostStart();

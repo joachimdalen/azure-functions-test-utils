@@ -62,7 +62,7 @@
         /// <summary>
         /// Start Azurite alongside function app host
         /// </summary>
-        public bool RunAzurite { get; set; } = false;
+        public bool RunAzurite { get; set; }
 
         /// <summary>
         /// Decides if containers created by the function app should be persisted after test run.
