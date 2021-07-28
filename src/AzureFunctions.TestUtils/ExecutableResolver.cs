@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace AzureFunctions.TestUtils
 {
@@ -61,6 +59,11 @@ namespace AzureFunctions.TestUtils
 
         public string GetFunctionHostPath()
         {
+            if (OperatingSystem.IsLinux())
+            {
+                return "/usr/local/lib/node_modules/azure-functions-core-tools/bin/func";
+            }
+
             var tools = GetToolFromLookup("func");
             return tools;
         }
