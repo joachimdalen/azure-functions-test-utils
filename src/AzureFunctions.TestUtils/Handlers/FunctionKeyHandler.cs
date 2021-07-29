@@ -12,9 +12,9 @@ namespace AzureFunctions.TestUtils.Handlers
     internal class FunctionKeyHandler
     {
         private const string BlobContainerName = "azure-webjobs-secrets";
-        private readonly BlobContainerClient _blobContainerClient;
+        private BlobContainerClient _blobContainerClient;
 
-        public FunctionKeyHandler()
+        public void Init()
         {
             var blobServiceClient = new BlobServiceClient(Context.Data.Settings.StorageConnectionString);
             _blobContainerClient = blobServiceClient.GetBlobContainerClient(BlobContainerName);

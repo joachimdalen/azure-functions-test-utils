@@ -131,7 +131,11 @@ namespace AzureFunctions.TestUtils
 
         #region Azurite
 
-        public void InitStorage() => _azuriteHandler.InitAzuriteHost();
+        public void InitStorage()
+        {
+            _azuriteHandler.InitAzuriteHost();
+            _keyHandler.Init();
+        }
 
         public void ClearStorage()
         {
