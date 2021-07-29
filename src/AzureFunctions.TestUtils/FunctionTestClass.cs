@@ -112,7 +112,7 @@ namespace AzureFunctions.TestUtils
                 Context.Data.BlobContainers = containers;
                 Context.Data.Tables = tables;
 
-                if (Context.Data.Settings.RunAzurite)
+                if (Context.Data.Settings.UseAzuriteStorage)
                 {
                     Fixture.InitStorage();
                     Fixture.InitFunctionKeys();
@@ -139,11 +139,16 @@ namespace AzureFunctions.TestUtils
         {
             Fixture.StopFunctionHost();
 
-            if (Context.Data.Settings.RunAzurite)
+            if (Context.Data.Settings.ClearStorageAfterRun)
             {
                 Fixture.ClearStorage();
+            }
+            
+            if (Context.Data.Settings.RunAzurite)
+            {
                 Fixture.StopAzurite();
             }
+            
 
             Context.Reset();
         }

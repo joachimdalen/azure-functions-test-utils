@@ -41,39 +41,42 @@ namespace AzureFunctions.TestUtils.Handlers
 
         public void InitAzuriteHost()
         {
-            var azuriteHost = Context.Data.Settings.AzuritePath;
-
-            var arguments = new[]
+            if (Context.Data.Settings.RunAzurite)
             {
-                GetBlobArguments(),
-                GetQueueArguments(),
-                GetTableArguments(),
-                GetLocation()
-            }.Where(x => !string.IsNullOrEmpty(x)).ToArray();
+                var azuriteHost = Context.Data.Settings.AzuritePath;
 
-
-            _azuriteProcess = new Process
-            {
-                StartInfo =
+                var arguments = new[]
                 {
-                    FileName = azuriteHost,
-                    Arguments = string.Join(" ", arguments),
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true
-                },
-            };
+                    GetBlobArguments(),
+                    GetQueueArguments(),
+                    GetTableArguments(),
+                    GetLocation()
+                }.Where(x => !string.IsNullOrEmpty(x)).ToArray();
 
-            var success = _azuriteProcess.Start();
-            if (!success)
-            {
-                throw new InvalidOperationException("Could not start Azurite host.");
-            }
 
-            if (_azuriteProcess.HasExited)
-            {
-                var error = _azuriteProcess.StandardError.ReadToEnd();
-                var output = _azuriteProcess.StandardOutput.ReadToEnd();
-                throw new Exception($"Failed to start Azurite. Out: {output} ; Error: {error}");
+                _azuriteProcess = new Process
+                {
+                    StartInfo =
+                    {
+                        FileName = azuriteHost,
+                        Arguments = string.Join(" ", arguments),
+                        RedirectStandardError = true,
+                        RedirectStandardOutput = true
+                    },
+                };
+
+                var success = _azuriteProcess.Start();
+                if (!success)
+                {
+                    throw new InvalidOperationException("Could not start Azurite host.");
+                }
+
+                if (_azuriteProcess.HasExited)
+                {
+                    var error = _azuriteProcess.StandardError.ReadToEnd();
+                    var output = _azuriteProcess.StandardOutput.ReadToEnd();
+                    throw new Exception($"Failed to start Azurite. Out: {output} ; Error: {error}");
+                }
             }
 
 
