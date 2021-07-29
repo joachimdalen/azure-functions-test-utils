@@ -26,19 +26,28 @@ namespace AzureFunctions.TestUtils
 
         protected static void AssemblyInitialize(TestContext context, TestUtilsSettings settings)
         {
+            settings.DataDirectory = GetFirstNotNullOrEmpty(EnvironmentHelper.DataDirectory, settings.DataDirectory);
+            settings.RunAzurite = GetFirstBool(EnvironmentHelper.RunAzurite, settings.RunAzurite);
+            settings.ClearStorageAfterRun = GetFirstBool(EnvironmentHelper.ClearStorageAfterRun, settings.ClearStorageAfterRun);
+            settings.UseAzuriteStorage = GetFirstBool(EnvironmentHelper.UseAzuriteStorage, settings.UseAzuriteStorage);
+            settings.PersistAzureContainers = GetFirstBool(EnvironmentHelper.PersistAzureContainers, settings.PersistAzureContainers);
+            
             if (string.IsNullOrEmpty(settings.DotNetPath))
             {
-                settings.DotNetPath = ExecutableResolver.GetDotNetPath();
+                settings.DotNetPath =
+                    GetFirstNotNullOrEmpty(EnvironmentHelper.DotNetPath, ExecutableResolver.GetDotNetPath());
             }
 
             if (string.IsNullOrEmpty(settings.AzuritePath))
             {
-                settings.AzuritePath = ExecutableResolver.GetAzuritePath();
+                settings.AzuritePath =
+                    GetFirstNotNullOrEmpty(EnvironmentHelper.AzuritePath, ExecutableResolver.GetAzuritePath());
             }
 
             if (string.IsNullOrEmpty(settings.FuncHostPath))
             {
-                settings.FuncHostPath = ExecutableResolver.GetFunctionHostPath();
+                settings.FuncHostPath = GetFirstNotNullOrEmpty(EnvironmentHelper.FuncHostPath,
+                    ExecutableResolver.GetFunctionHostPath());
                 if (!File.Exists(settings.FuncHostPath))
                 {
                     throw new Exception(
@@ -46,6 +55,7 @@ namespace AzureFunctions.TestUtils
                 }
             }
 
+            settings.FuncAppPath = GetFirstNotNullOrEmpty(EnvironmentHelper.FuncAppPath, settings.FuncAppPath);
             if (string.IsNullOrEmpty(settings.FuncAppPath))
             {
                 throw new ArgumentException("Function app path must be given");
@@ -70,7 +80,6 @@ namespace AzureFunctions.TestUtils
 
                 settings.StorageConnectionString = ConnectionStringHandler.GetConnectionString(settings);
             }
-
             var path = Path.Combine(context.TestRunDirectory, "azurite-data");
             Directory.CreateDirectory(path);
             settings.DataDirectory = path;
@@ -143,12 +152,12 @@ namespace AzureFunctions.TestUtils
             {
                 Fixture.ClearStorage();
             }
-            
+
             if (Context.Data.Settings.RunAzurite)
             {
                 Fixture.StopAzurite();
             }
-            
+
 
             Context.Reset();
         }
@@ -164,6 +173,17 @@ namespace AzureFunctions.TestUtils
             var currentlyRunningClassType = GetType().Assembly.GetTypes()
                 .FirstOrDefault(f => f.FullName == TestContext.FullyQualifiedTestClassName);
             return currentlyRunningClassType;
+        }
+
+        private static string GetFirstNotNullOrEmpty(string first, string second)
+        {
+            if (!string.IsNullOrEmpty(first)) return first;
+            return !string.IsNullOrEmpty(second) ? second : null;
+        }
+
+        private static bool GetFirstBool(bool? first, bool defaultValue)
+        {
+            return first ?? defaultValue;
         }
 
         #endregion

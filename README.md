@@ -168,3 +168,18 @@ public async Task CreateOrder_Sends_Confirmation()
 | Queue | QueueIsEmpty         | Assert that the given queue does not contain any messages                   |
 | Queue | QueueHasMessageCount | Assert that the given queue contains the given amount of messages           |
 | Queue | QueueHasMessage      | Assert that the queue contains at least one message matching the expression |
+
+### Settings
+
+| Setting                  | Environment                     | Description                                                                               |
+| ------------------------ | ------------------------------- | ----------------------------------------------------------------------------------------- |
+| `DotNetPath`             | `AFTU_DOT_NET_PATH`             | Path to dotnet executable                                                                 |
+| `FuncHostPath`           | `AFTU_FUNC_HOST_PATH`           | Path to func.dll                                                                          |
+| `FuncAppPath`            | `AFTU_FUNC_APP_PATH`            | Directory path to function app to run                                                     |
+| `AzuritePath`            | `AFTU_AZURITE_PATH`             | Path to Azurite executable                                                                |
+| `FuncHostPort`           | `AFTU_FUNC_HOST_PORT`           | Port to run function app on                                                               |
+| `DataDirectory`          | `AFTU_DATA_DIRECTORY`           | Directory to store Azurite data in. Defaults to TestResults directory for the given test  |
+| `UseAzuriteStorage`      | `AFTU_USE_AZURITE_STORAGE`      | Use azurite storage emulator. This should be true if using any storage related attributes |
+| `RunAzurite`             | `AFTU_RUN_AZURITE`              | Start Azurite alongside function app host                                                 |
+| `PersistAzureContainers` | `AFTU_PERSIST_AZURE_CONTAINERS` | Decides if containers created by the function app should be persisted after test run.     |
+| `ClearStorageAfterRun`   | `AFTU_CLEAR_STORAGE_AFTER_RUN`  | Clears Azurite after each test run and provides a clean container for new runs            |

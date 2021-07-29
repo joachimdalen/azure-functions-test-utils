@@ -51,6 +51,8 @@ stages:
               projects: '**/*.csproj'
           - task: DotNetCoreCLI@2
             displayName: 'Run Tests'
+            env:
+              AFTU_RUN_AZURITE: true
             inputs:
               command: 'test'
               projects: '**/*Tests/*IntegrationTests.csproj'
