@@ -55,4 +55,5 @@ stages:
               command: 'test'
               projects: '**/*Tests/*IntegrationTests.csproj'
               arguments: '--configuration $(BUILD_CONFIGURATION)  --collect "Code coverage"'
+              testRunTitle: 'Integration Tests'
  
