@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using AzureFunctions.TestUtils.Handlers;
 using AzureFunctions.TestUtils.Models;
@@ -150,6 +151,7 @@ namespace AzureFunctions.TestUtils
             _azuriteHandler.ClearQueues();
             _azuriteHandler.ClearBlobContainers();
             _azuriteHandler.ClearTables();
+            Thread.Sleep(3000); // Allow Azurite to save state
         }
 
         public void StopAzurite() => _azuriteHandler.Stop();
