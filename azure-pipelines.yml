@@ -58,4 +58,14 @@ stages:
               projects: '**/*Tests/*IntegrationTests.csproj'
               arguments: '--configuration $(BUILD_CONFIGURATION)  --collect "Code coverage"'
               testRunTitle: 'Integration Tests'
- 
+          - task: Bash@3
+            condition: always()
+            inputs:
+              targetType: 'inline'
+              script: 'cp -r /tmp/aftu $(Pipeline.Workspace)'
+          - task: PublishPipelineArtifact@1
+            condition: always()
+            inputs:
+              targetPath: '$(Pipeline.Workspace)'
+              artifact: 'aftu-logs'
+              publishLocation: 'pipeline'

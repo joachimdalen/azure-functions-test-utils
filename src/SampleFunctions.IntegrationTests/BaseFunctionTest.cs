@@ -15,7 +15,8 @@ namespace SampleFunctions.IntegrationTests
                 FuncAppPath = "../../../../SampleFunctions/bin/Debug/netcoreapp3.1",
                 UseAzuriteStorage = true,
                 PersistAzureContainers = false,
-                ClearStorageAfterRun = true
+                ClearStorageAfterRun = true,
+                WriteLog = true
             };
             AssemblyInitialize(context, settings);
         }

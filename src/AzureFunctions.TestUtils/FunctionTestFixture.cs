@@ -84,12 +84,20 @@ namespace AzureFunctions.TestUtils
                     {
                         FileName = dotnetExePath,
                         Arguments = string.Join(" ", arguments),
-                        WorkingDirectory = functionAppFolder
+                        WorkingDirectory = functionAppFolder,
+                        RedirectStandardError = true,
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false
                     },
                 };
                 _funcHostProcess.StartInfo.EnvironmentVariables["AzureWebJobsStorage"] =
                     Context.Data.Settings.StorageConnectionString;
+
+                _funcHostProcess.ErrorDataReceived += (sender, args) => Logger.Log("func-host", args.Data);
+                _funcHostProcess.OutputDataReceived += (sender, args) => Logger.Log("func-host-error", args.Data);
                 var success = _funcHostProcess.Start();
+                _funcHostProcess.BeginErrorReadLine();
+                _funcHostProcess.BeginOutputReadLine();
                 if (!success)
                 {
                     throw new InvalidOperationException("Could not start Azure Functions host.");

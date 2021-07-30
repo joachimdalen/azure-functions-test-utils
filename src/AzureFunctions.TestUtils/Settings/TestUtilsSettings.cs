@@ -78,5 +78,11 @@
         /// Clears Azurite after each test run and provides a clean container for new runs
         /// </summary>
         public bool ClearStorageAfterRun { get; set; }
+        
+        
+        /// <summary>
+        /// Write to logfiles for Azurite and Function host
+        /// </summary>
+        public bool WriteLog { get; set; }
     }
 }

@@ -17,6 +17,7 @@ namespace AzureFunctions.TestUtils
             GetBoolEnvironmentVariable("AFTU_PERSIST_AZURE_CONTAINERS");
 
         public static bool? ClearStorageAfterRun => GetBoolEnvironmentVariable("AFTU_CLEAR_STORAGE_AFTER_RUN");
+        public static bool? WriteLog => GetBoolEnvironmentVariable("AFTU_WRITE_LOG");
 
         private static bool? GetBoolEnvironmentVariable(string variable)
         {

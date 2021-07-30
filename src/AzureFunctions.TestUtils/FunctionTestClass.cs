@@ -26,12 +26,15 @@ namespace AzureFunctions.TestUtils
 
         protected static void AssemblyInitialize(TestContext context, TestUtilsSettings settings)
         {
+            Logger.ClearLogs();
             settings.DataDirectory = GetFirstNotNullOrEmpty(EnvironmentHelper.DataDirectory, settings.DataDirectory);
             settings.RunAzurite = GetFirstBool(EnvironmentHelper.RunAzurite, settings.RunAzurite);
-            settings.ClearStorageAfterRun = GetFirstBool(EnvironmentHelper.ClearStorageAfterRun, settings.ClearStorageAfterRun);
+            settings.ClearStorageAfterRun =
+                GetFirstBool(EnvironmentHelper.ClearStorageAfterRun, settings.ClearStorageAfterRun);
             settings.UseAzuriteStorage = GetFirstBool(EnvironmentHelper.UseAzuriteStorage, settings.UseAzuriteStorage);
-            settings.PersistAzureContainers = GetFirstBool(EnvironmentHelper.PersistAzureContainers, settings.PersistAzureContainers);
-            
+            settings.PersistAzureContainers =
+                GetFirstBool(EnvironmentHelper.PersistAzureContainers, settings.PersistAzureContainers);
+
             if (string.IsNullOrEmpty(settings.DotNetPath))
             {
                 settings.DotNetPath =
@@ -80,6 +83,7 @@ namespace AzureFunctions.TestUtils
 
                 settings.StorageConnectionString = ConnectionStringHandler.GetConnectionString(settings);
             }
+
             var path = Path.Combine(context.TestRunDirectory, "azurite-data");
             Directory.CreateDirectory(path);
             settings.DataDirectory = path;
@@ -100,7 +104,7 @@ namespace AzureFunctions.TestUtils
         protected void TestInitialize()
         {
             if (!Context.Data.IsInitialized) return;
-            
+
             var currentTest = GetCurrentTestMethod();
             var functionKeys = currentTest.GetFunctionKeys()?.Select(x => new FunctionKey
             {
@@ -111,9 +115,9 @@ namespace AzureFunctions.TestUtils
             }).ToArray() ?? Array.Empty<FunctionKey>();
             var functionsToRun = currentTest.GetStartFunctions()?.FirstOrDefault()?.FunctionNames;
             var enableAuth = currentTest.GetUseFunctionAuth().Any();
-            var queues = currentTest.GetQueues().FirstOrDefault()?.QueueNames;
-            var containers = currentTest.GetBlobContainers().FirstOrDefault()?.ContainerNames;
-            var tables = currentTest.GetTables().FirstOrDefault()?.TableNames;
+            var queues = currentTest.GetQueues().SelectMany(x => x.QueueNames).Distinct().ToArray();
+            var containers = currentTest.GetBlobContainers().SelectMany(x => x.ContainerNames).Distinct().ToArray();
+            var tables = currentTest.GetTables().SelectMany(x => x.TableNames).Distinct().ToArray();
             Context.Data.FunctionKeys = functionKeys;
             Context.Data.FunctionsToRun = functionsToRun;
             Context.Data.EnableAuth = enableAuth;

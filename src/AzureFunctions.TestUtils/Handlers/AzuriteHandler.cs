@@ -61,11 +61,16 @@ namespace AzureFunctions.TestUtils.Handlers
                         FileName = azuriteHost,
                         Arguments = string.Join(" ", arguments),
                         RedirectStandardError = true,
-                        RedirectStandardOutput = true
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false
+                        
                     },
                 };
-
+                _azuriteProcess.ErrorDataReceived += (sender, args) => Logger.Log("azurite", args.Data);
+                _azuriteProcess.OutputDataReceived += (sender, args) => Logger.Log("azurite-error", args.Data);
                 var success = _azuriteProcess.Start();
+                _azuriteProcess.BeginErrorReadLine();
+                _azuriteProcess.BeginOutputReadLine();
                 if (!success)
                 {
                     throw new InvalidOperationException("Could not start Azurite host.");
