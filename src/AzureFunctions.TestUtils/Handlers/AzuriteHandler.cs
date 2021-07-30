@@ -66,8 +66,8 @@ namespace AzureFunctions.TestUtils.Handlers
                         
                     },
                 };
-                _azuriteProcess.ErrorDataReceived += (sender, args) => Logger.Log("azurite", args.Data);
-                _azuriteProcess.OutputDataReceived += (sender, args) => Logger.Log("azurite-error", args.Data);
+                _azuriteProcess.ErrorDataReceived += (sender, args) => Logger.Log("azurite-error", args.Data);
+                _azuriteProcess.OutputDataReceived += (sender, args) => Logger.Log("azurite", args.Data);
                 var success = _azuriteProcess.Start();
                 _azuriteProcess.BeginErrorReadLine();
                 _azuriteProcess.BeginOutputReadLine();

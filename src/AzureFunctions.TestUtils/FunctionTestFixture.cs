@@ -93,8 +93,8 @@ namespace AzureFunctions.TestUtils
                 _funcHostProcess.StartInfo.EnvironmentVariables["AzureWebJobsStorage"] =
                     Context.Data.Settings.StorageConnectionString;
 
-                _funcHostProcess.ErrorDataReceived += (sender, args) => Logger.Log("func-host", args.Data);
-                _funcHostProcess.OutputDataReceived += (sender, args) => Logger.Log("func-host-error", args.Data);
+                _funcHostProcess.ErrorDataReceived += (sender, args) => Logger.Log("func-host-error", args.Data);
+                _funcHostProcess.OutputDataReceived += (sender, args) => Logger.Log("func-host", args.Data);
                 var success = _funcHostProcess.Start();
                 _funcHostProcess.BeginErrorReadLine();
                 _funcHostProcess.BeginOutputReadLine();
