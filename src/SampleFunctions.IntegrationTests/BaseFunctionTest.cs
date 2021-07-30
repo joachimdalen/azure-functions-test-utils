@@ -32,12 +32,6 @@ namespace SampleFunctions.IntegrationTests
             TestInitialize();
         }
 
-        [AssemblyCleanup]
-        public static void AssemblyTearDown()
-        {
-            AssemblyCleanup();
-        }
-
         [ClassCleanup(InheritanceBehavior.BeforeEachDerivedClass)]
         public static void TestFixtureTearDown()
         {

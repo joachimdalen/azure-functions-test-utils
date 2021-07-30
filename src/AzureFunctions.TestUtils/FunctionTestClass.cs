@@ -99,41 +99,35 @@ namespace AzureFunctions.TestUtils
 
         protected void TestInitialize()
         {
-            if (Context.Data.IsInitialized)
+            if (!Context.Data.IsInitialized) return;
+            
+            var currentTest = GetCurrentTestMethod();
+            var functionKeys = currentTest.GetFunctionKeys()?.Select(x => new FunctionKey
             {
-                var currentTest = GetCurrentTestMethod();
-                var functionKeys = currentTest.GetFunctionKeys()?.Select(x => new FunctionKey
-                {
-                    FunctionName = x.FunctionName,
-                    Name = x.Name,
-                    Value = x.Value,
-                    Scope = x.AuthLevel
-                }).ToArray() ?? Array.Empty<FunctionKey>();
-                var functionsToRun = currentTest.GetStartFunctions()?.FirstOrDefault()?.FunctionNames;
-                var enableAuth = currentTest.GetUseFunctionAuth().Any();
-                var queues = currentTest.GetQueues().FirstOrDefault()?.QueueNames;
-                var containers = currentTest.GetBlobContainers().FirstOrDefault()?.ContainerNames;
-                var tables = currentTest.GetTables().FirstOrDefault()?.TableNames;
-                Context.Data.FunctionKeys = functionKeys;
-                Context.Data.FunctionsToRun = functionsToRun;
-                Context.Data.EnableAuth = enableAuth;
-                Context.Data.Queues = queues;
-                Context.Data.BlobContainers = containers;
-                Context.Data.Tables = tables;
+                FunctionName = x.FunctionName,
+                Name = x.Name,
+                Value = x.Value,
+                Scope = x.AuthLevel
+            }).ToArray() ?? Array.Empty<FunctionKey>();
+            var functionsToRun = currentTest.GetStartFunctions()?.FirstOrDefault()?.FunctionNames;
+            var enableAuth = currentTest.GetUseFunctionAuth().Any();
+            var queues = currentTest.GetQueues().FirstOrDefault()?.QueueNames;
+            var containers = currentTest.GetBlobContainers().FirstOrDefault()?.ContainerNames;
+            var tables = currentTest.GetTables().FirstOrDefault()?.TableNames;
+            Context.Data.FunctionKeys = functionKeys;
+            Context.Data.FunctionsToRun = functionsToRun;
+            Context.Data.EnableAuth = enableAuth;
+            Context.Data.Queues = queues;
+            Context.Data.BlobContainers = containers;
+            Context.Data.Tables = tables;
 
-                if (Context.Data.Settings.UseAzuriteStorage)
-                {
-                    Fixture.InitStorage();
-                    Fixture.InitFunctionKeys();
-                }
-
-                Fixture.InitFunctionHost(TestContext);
+            if (Context.Data.Settings.UseAzuriteStorage)
+            {
+                Fixture.InitStorage();
+                Fixture.InitFunctionKeys();
             }
-        }
 
-        protected static void AssemblyCleanup()
-        {
-            // Executes once after the test run. (Optional)
+            Fixture.InitFunctionHost(TestContext);
         }
 
         protected static void ClassCleanup()
@@ -157,7 +151,6 @@ namespace AzureFunctions.TestUtils
             {
                 Fixture.StopAzurite();
             }
-
 
             Context.Reset();
         }

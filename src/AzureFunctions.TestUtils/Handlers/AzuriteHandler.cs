@@ -15,7 +15,7 @@ namespace AzureFunctions.TestUtils.Handlers
         private readonly QueueServiceClient _queueServiceClient;
         private readonly TableServiceClient _tableServiceClient;
 
-        private readonly string[] _azureDirectories = new[]
+        private readonly string[] _azureContainers =
         {
             "azure-webjobs-secrets",
             "azure-webjobs-hosts"
@@ -105,7 +105,7 @@ namespace AzureFunctions.TestUtils.Handlers
             {
                 foreach (var containerItem in page.Values)
                 {
-                    if (Context.Data.Settings.PersistAzureContainers && _azureDirectories.Contains(containerItem.Name))
+                    if (Context.Data.Settings.PersistAzureContainers && _azureContainers.Contains(containerItem.Name))
                     {
                         continue;
                     }
