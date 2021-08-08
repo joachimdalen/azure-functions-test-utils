@@ -1,22 +1,28 @@
 trigger: none
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: "ubuntu-latest"
+
+parameters:
+  - name: "WRITE_LOG"
+    type: boolean
+    default: false
+    displayName: "Write logfiles"
 
 variables:
-  BUILD_CONFIGURATION: 'Debug'
+  BUILD_CONFIGURATION: "Debug"
 
 stages:
   - stage: buildAndTest
-    displayName: 'Build & Test'
-    jobs: 
-      - job: 'Build'
-        displayName: 'Build job'
+    displayName: "Build & Test"
+    jobs:
+      - job: "Build"
+        displayName: "Build job"
         pool:
-          vmImage: 'ubuntu-latest'
+          vmImage: "ubuntu-latest"
         steps:
           - task: NodeTool@0
-            displayName: 'Install nodeJS'
+            displayName: "Install nodeJS"
             inputs:
               versionSpec: "13.x"
               checkLatest: true
@@ -39,33 +45,34 @@ stages:
                 ls -l /opt/hostedtoolcache/node/13.14.0/x64/lib/node_modules/azure-functions-core-tools
                 ls -l /opt/hostedtoolcache/node/13.14.0/x64/lib/node_modules/azure-functions-core-tools/bin
           - task: DotNetCoreCLI@2
-            displayName: 'Restore project dependencies'
+            displayName: "Restore project dependencies"
             inputs:
-              command: 'restore'
-              projects: '**/*.csproj'
+              command: "restore"
+              projects: "**/*.csproj"
           - task: DotNetCoreCLI@2
-            displayName: 'Build the project - $(BUILD_CONFIGURATION)'
+            displayName: "Build the project - $(BUILD_CONFIGURATION)"
             inputs:
-              command: 'build'
-              arguments: '--no-restore --configuration $(BUILD_CONFIGURATION)'
-              projects: '**/*.csproj'
+              command: "build"
+              arguments: "--no-restore --configuration $(BUILD_CONFIGURATION)"
+              projects: "**/*.csproj"
           - task: DotNetCoreCLI@2
-            displayName: 'Run Tests'
+            displayName: "Run Tests"
             env:
               AFTU_RUN_AZURITE: true
+              AFTU_WRITE_LOG: ${{ parameters.WRITE_LOG }}
             inputs:
-              command: 'test'
-              projects: '**/*Tests/*IntegrationTests.csproj'
+              command: "test"
+              projects: "**/*Tests/*IntegrationTests.csproj"
               arguments: '--configuration $(BUILD_CONFIGURATION)  --collect "Code coverage"'
-              testRunTitle: 'Integration Tests'
+              testRunTitle: "Integration Tests"
           - task: Bash@3
-            condition: always()
+            condition: and(always(), eq(${{ parameters.WRITE_LOG }}, true)
             inputs:
-              targetType: 'inline'
-              script: 'cp -r /tmp/aftu $(Pipeline.Workspace)'
+              targetType: "inline"
+              script: "cp -r /tmp/aftu $(Pipeline.Workspace)"
           - task: PublishPipelineArtifact@1
-            condition: always()
+            condition: and(always(), eq(${{ parameters.WRITE_LOG }}, true)
             inputs:
-              targetPath: '$(Pipeline.Workspace)/aftu'
-              artifact: 'aftu-logs'
-              publishLocation: 'pipeline'
+              targetPath: "$(Pipeline.Workspace)/aftu"
+              artifact: "aftu-logs"
+              publishLocation: "pipeline"
