@@ -12,36 +12,13 @@ namespace AzureFunctions.TestUtils.Handlers
     internal class FunctionKeyHandler
     {
         private const string BlobContainerName = "azure-webjobs-secrets";
-        private readonly BlobContainerClient _blobContainerClient;
+        private BlobContainerClient _blobContainerClient;
 
-        public FunctionKeyHandler()
+        public void Init()
         {
             var blobServiceClient = new BlobServiceClient(Context.Data.Settings.StorageConnectionString);
             _blobContainerClient = blobServiceClient.GetBlobContainerClient(BlobContainerName);
             _blobContainerClient.CreateIfNotExists();
-        }
-
-        public string CreateHostKey(string keyName, string value)
-        {
-            var path = Path.Join(GetFunctionHostId(), "host.json");
-            var client = _blobContainerClient.GetBlobClient(path);
-            FunctionSecretRoot root;
-            if (client.Exists())
-            {
-                var blob = client.DownloadContent();
-                var text = Encoding.UTF8.GetString(blob.Value.Content);
-                root = JsonConvert.DeserializeObject<FunctionSecretRoot>(text);
-            }
-            else
-            {
-                root = new FunctionSecretRoot
-                {
-                    MasterKey = new FunctionSecret(),
-                    FunctionKeys = new[] {new FunctionSecret()}
-                };
-            }
-
-            return "";
         }
 
         #region Helpers
@@ -53,8 +30,6 @@ namespace AzureFunctions.TestUtils.Handlers
                 byte[] data = new byte[40];
                 rng.GetBytes(data);
                 string secret = Convert.ToBase64String(data);
-
-                // Replace pluses as they are problematic as URL values
                 return secret.Replace('+', 'a');
             }
         }

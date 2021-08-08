@@ -26,25 +26,39 @@ namespace AzureFunctions.TestUtils
 
         protected static void AssemblyInitialize(TestContext context, TestUtilsSettings settings)
         {
+            Logger.ClearLogs();
+            settings.DataDirectory = GetFirstNotNullOrEmpty(EnvironmentHelper.DataDirectory, settings.DataDirectory);
+            settings.RunAzurite = GetFirstBool(EnvironmentHelper.RunAzurite, settings.RunAzurite);
+            settings.ClearStorageAfterRun =
+                GetFirstBool(EnvironmentHelper.ClearStorageAfterRun, settings.ClearStorageAfterRun);
+            settings.UseAzuriteStorage = GetFirstBool(EnvironmentHelper.UseAzuriteStorage, settings.UseAzuriteStorage);
+            settings.PersistAzureContainers =
+                GetFirstBool(EnvironmentHelper.PersistAzureContainers, settings.PersistAzureContainers);
+
             if (string.IsNullOrEmpty(settings.DotNetPath))
             {
-                settings.DotNetPath = ExecutableResolver.GetDotNetPath();
+                settings.DotNetPath =
+                    GetFirstNotNullOrEmpty(EnvironmentHelper.DotNetPath, ExecutableResolver.GetDotNetPath());
             }
 
             if (string.IsNullOrEmpty(settings.AzuritePath))
             {
-                settings.AzuritePath = ExecutableResolver.GetAzuritePath();
+                settings.AzuritePath =
+                    GetFirstNotNullOrEmpty(EnvironmentHelper.AzuritePath, ExecutableResolver.GetAzuritePath());
             }
 
             if (string.IsNullOrEmpty(settings.FuncHostPath))
             {
-                settings.FuncHostPath = ExecutableResolver.GetFunctionHostPath();
+                settings.FuncHostPath = GetFirstNotNullOrEmpty(EnvironmentHelper.FuncHostPath,
+                    ExecutableResolver.GetFunctionHostPath());
                 if (!File.Exists(settings.FuncHostPath))
                 {
-                    throw new Exception($"FuncHostPath must be the full path, including func.dll. Currently {settings.FuncHostPath}");
+                    throw new Exception(
+                        $"FuncHostPath must be the full path, including func.dll. Currently {settings.FuncHostPath}");
                 }
             }
 
+            settings.FuncAppPath = GetFirstNotNullOrEmpty(EnvironmentHelper.FuncAppPath, settings.FuncAppPath);
             if (string.IsNullOrEmpty(settings.FuncAppPath))
             {
                 throw new ArgumentException("Function app path must be given");
@@ -89,41 +103,35 @@ namespace AzureFunctions.TestUtils
 
         protected void TestInitialize()
         {
-            if (Context.Data.IsInitialized)
+            if (!Context.Data.IsInitialized) return;
+
+            var currentTest = GetCurrentTestMethod();
+            var functionKeys = currentTest.GetFunctionKeys()?.Select(x => new FunctionKey
             {
-                var currentTest = GetCurrentTestMethod();
-                var functionKeys = currentTest.GetFunctionKeys()?.Select(x => new FunctionKey
-                {
-                    FunctionName = x.FunctionName,
-                    Name = x.Name,
-                    Value = x.Value,
-                    Scope = x.AuthLevel
-                }).ToArray() ?? Array.Empty<FunctionKey>();
-                var functionsToRun = currentTest.GetStartFunctions()?.FirstOrDefault()?.FunctionNames;
-                var enableAuth = currentTest.GetUseFunctionAuth().Any();
-                var queues = currentTest.GetQueues().FirstOrDefault()?.QueueNames;
-                var containers = currentTest.GetBlobContainers().FirstOrDefault()?.ContainerNames;
-                var tables = currentTest.GetTables().FirstOrDefault()?.TableNames;
-                Context.Data.FunctionKeys = functionKeys;
-                Context.Data.FunctionsToRun = functionsToRun;
-                Context.Data.EnableAuth = enableAuth;
-                Context.Data.Queues = queues;
-                Context.Data.BlobContainers = containers;
-                Context.Data.Tables = tables;
+                FunctionName = x.FunctionName,
+                Name = x.Name,
+                Value = x.Value,
+                Scope = x.AuthLevel
+            }).ToArray() ?? Array.Empty<FunctionKey>();
+            var functionsToRun = currentTest.GetStartFunctions()?.FirstOrDefault()?.FunctionNames;
+            var enableAuth = currentTest.GetUseFunctionAuth().Any();
+            var queues = currentTest.GetQueues().SelectMany(x => x.QueueNames).Distinct().ToArray();
+            var containers = currentTest.GetBlobContainers().SelectMany(x => x.ContainerNames).Distinct().ToArray();
+            var tables = currentTest.GetTables().SelectMany(x => x.TableNames).Distinct().ToArray();
+            Context.Data.FunctionKeys = functionKeys;
+            Context.Data.FunctionsToRun = functionsToRun;
+            Context.Data.EnableAuth = enableAuth;
+            Context.Data.Queues = queues;
+            Context.Data.BlobContainers = containers;
+            Context.Data.Tables = tables;
 
-                if (Context.Data.Settings.RunAzurite)
-                {
-                    Fixture.InitStorage();
-                    Fixture.InitFunctionKeys();
-                }
-
-                Fixture.InitFunctionHost(TestContext);
+            if (Context.Data.Settings.UseAzuriteStorage)
+            {
+                Fixture.InitStorage();
+                Fixture.InitFunctionKeys();
             }
-        }
 
-        protected static void AssemblyCleanup()
-        {
-            // Executes once after the test run. (Optional)
+            Fixture.InitFunctionHost(TestContext);
         }
 
         protected static void ClassCleanup()
@@ -138,10 +146,14 @@ namespace AzureFunctions.TestUtils
         {
             Fixture.StopFunctionHost();
 
-            if (Context.Data.Settings.RunAzurite)
+            if (Context.Data.Settings.ClearStorageAfterRun)
             {
                 Fixture.ClearStorage();
-                //     Fixture.StopAzurite();    
+            }
+
+            if (Context.Data.Settings.RunAzurite)
+            {
+                Fixture.StopAzurite();
             }
 
             Context.Reset();
@@ -158,6 +170,17 @@ namespace AzureFunctions.TestUtils
             var currentlyRunningClassType = GetType().Assembly.GetTypes()
                 .FirstOrDefault(f => f.FullName == TestContext.FullyQualifiedTestClassName);
             return currentlyRunningClassType;
+        }
+
+        private static string GetFirstNotNullOrEmpty(string first, string second)
+        {
+            if (!string.IsNullOrEmpty(first)) return first;
+            return !string.IsNullOrEmpty(second) ? second : null;
+        }
+
+        private static bool GetFirstBool(bool? first, bool defaultValue)
+        {
+            return first ?? defaultValue;
         }
 
         #endregion

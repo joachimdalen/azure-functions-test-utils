@@ -60,13 +60,29 @@
         public string DataDirectory { get; set; }
 
         /// <summary>
+        /// Use azurite storage emulator. This should be true if using any storage related attributes
+        /// </summary>
+        public bool UseAzuriteStorage { get; set; }
+
+        /// <summary>
         /// Start Azurite alongside function app host
         /// </summary>
-        public bool RunAzurite { get; set; } = false;
+        public bool RunAzurite { get; set; }
 
         /// <summary>
         /// Decides if containers created by the function app should be persisted after test run.
         /// </summary>
         public bool PersistAzureContainers { get; set; }
+
+        /// <summary>
+        /// Clears Azurite after each test run and provides a clean container for new runs
+        /// </summary>
+        public bool ClearStorageAfterRun { get; set; }
+        
+        
+        /// <summary>
+        /// Write to logfiles for Azurite and Function host
+        /// </summary>
+        public bool WriteLog { get; set; }
     }
 }

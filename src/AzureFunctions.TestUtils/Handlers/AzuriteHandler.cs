@@ -15,7 +15,7 @@ namespace AzureFunctions.TestUtils.Handlers
         private readonly QueueServiceClient _queueServiceClient;
         private readonly TableServiceClient _tableServiceClient;
 
-        private readonly string[] _azureDirectories = new[]
+        private readonly string[] _azureContainers =
         {
             "azure-webjobs-secrets",
             "azure-webjobs-hosts"
@@ -41,41 +41,48 @@ namespace AzureFunctions.TestUtils.Handlers
 
         public void InitAzuriteHost()
         {
-            var azuriteHost = Context.Data.Settings.AzuritePath;
-
-            var arguments = new[]
+            if (Context.Data.Settings.RunAzurite)
             {
-                GetBlobArguments(),
-                GetQueueArguments(),
-                GetTableArguments(),
-                GetLocation()
-            }.Where(x => !string.IsNullOrEmpty(x)).ToArray();
+                var azuriteHost = Context.Data.Settings.AzuritePath;
 
-
-            _azuriteProcess = new Process
-            {
-                StartInfo =
+                var arguments = new[]
                 {
-                    FileName = azuriteHost,
-                    Arguments = string.Join(" ", arguments),
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true
-                },
-            };
+                    GetBlobArguments(),
+                    GetQueueArguments(),
+                    GetTableArguments(),
+                    GetLocation()
+                }.Where(x => !string.IsNullOrEmpty(x)).ToArray();
 
-            /*var success = _azuriteProcess.Start();
-            if (!success)
-            {
-                throw new InvalidOperationException("Could not start Azurite host.");
+
+                _azuriteProcess = new Process
+                {
+                    StartInfo =
+                    {
+                        FileName = azuriteHost,
+                        Arguments = string.Join(" ", arguments),
+                        RedirectStandardError = true,
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false
+                        
+                    },
+                };
+                _azuriteProcess.ErrorDataReceived += (sender, args) => Logger.Log("azurite-error", args.Data);
+                _azuriteProcess.OutputDataReceived += (sender, args) => Logger.Log("azurite", args.Data);
+                var success = _azuriteProcess.Start();
+                _azuriteProcess.BeginErrorReadLine();
+                _azuriteProcess.BeginOutputReadLine();
+                if (!success)
+                {
+                    throw new InvalidOperationException("Could not start Azurite host.");
+                }
+
+                if (_azuriteProcess.HasExited)
+                {
+                    var error = _azuriteProcess.StandardError.ReadToEnd();
+                    var output = _azuriteProcess.StandardOutput.ReadToEnd();
+                    throw new Exception($"Failed to start Azurite. Out: {output} ; Error: {error}");
+                }
             }
-
-            var error = _azuriteProcess.StandardError.ReadToEnd();
-            var output = _azuriteProcess.StandardOutput.ReadToEnd();
-
-            if (_azuriteProcess.HasExited)
-            {
-                throw new Exception("Failed to start azurite");
-            }*/
 
 
             //WaitForHostStart();
@@ -103,7 +110,7 @@ namespace AzureFunctions.TestUtils.Handlers
             {
                 foreach (var containerItem in page.Values)
                 {
-                    if (Context.Data.Settings.PersistAzureContainers && _azureDirectories.Contains(containerItem.Name))
+                    if (Context.Data.Settings.PersistAzureContainers && _azureContainers.Contains(containerItem.Name))
                     {
                         continue;
                     }

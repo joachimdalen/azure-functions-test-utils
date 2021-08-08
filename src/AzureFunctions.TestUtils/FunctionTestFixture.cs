@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using AzureFunctions.TestUtils.Handlers;
 using AzureFunctions.TestUtils.Models;
@@ -84,12 +85,20 @@ namespace AzureFunctions.TestUtils
                     {
                         FileName = dotnetExePath,
                         Arguments = string.Join(" ", arguments),
-                        WorkingDirectory = functionAppFolder
+                        WorkingDirectory = functionAppFolder,
+                        RedirectStandardError = true,
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false
                     },
                 };
                 _funcHostProcess.StartInfo.EnvironmentVariables["AzureWebJobsStorage"] =
                     Context.Data.Settings.StorageConnectionString;
+
+                _funcHostProcess.ErrorDataReceived += (sender, args) => Logger.Log("func-host-error", args.Data);
+                _funcHostProcess.OutputDataReceived += (sender, args) => Logger.Log("func-host", args.Data);
                 var success = _funcHostProcess.Start();
+                _funcHostProcess.BeginErrorReadLine();
+                _funcHostProcess.BeginOutputReadLine();
                 if (!success)
                 {
                     throw new InvalidOperationException("Could not start Azure Functions host.");
@@ -131,13 +140,18 @@ namespace AzureFunctions.TestUtils
 
         #region Azurite
 
-        public void InitStorage() => _azuriteHandler.InitAzuriteHost();
+        public void InitStorage()
+        {
+            _azuriteHandler.InitAzuriteHost();
+            _keyHandler.Init();
+        }
 
         public void ClearStorage()
         {
             _azuriteHandler.ClearQueues();
             _azuriteHandler.ClearBlobContainers();
             _azuriteHandler.ClearTables();
+            Thread.Sleep(3000); // Allow Azurite to save state
         }
 
         public void StopAzurite() => _azuriteHandler.Stop();
