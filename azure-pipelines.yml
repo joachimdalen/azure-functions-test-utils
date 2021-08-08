@@ -71,12 +71,12 @@ stages:
               arguments: '--configuration $(BUILD_CONFIGURATION)  --collect "Code coverage"'
               testRunTitle: "Integration Tests"
           - task: Bash@3
-            condition: and(always(), eq(${{ parameters.WRITE_LOG }}, true)
+            condition: and(always(), eq(${{ parameters.WRITE_LOG }}, true))
             inputs:
               targetType: "inline"
               script: "cp -r /tmp/aftu $(Pipeline.Workspace)"
           - task: PublishPipelineArtifact@1
-            condition: and(always(), eq(${{ parameters.WRITE_LOG }}, true)
+            condition: and(always(), eq(${{ parameters.WRITE_LOG }}, true))
             inputs:
               targetPath: "$(Pipeline.Workspace)/aftu"
               artifact: "aftu-logs"
