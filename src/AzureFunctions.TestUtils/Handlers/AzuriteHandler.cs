@@ -38,6 +38,7 @@ namespace AzureFunctions.TestUtils.Handlers
             $"--tableHost 127.0.0.1 --tablePort {Context.Data.Settings.TablePort}";
 
         private string GetLocation() => $"--location \"{Context.Data.Settings.DataDirectory}\"";
+        private string GetSilentArguments() => Context.Data.Settings.RunAzuriteSilent ? "--silent" : null;
 
         public void InitAzuriteHost()
         {
@@ -51,6 +52,7 @@ namespace AzureFunctions.TestUtils.Handlers
                     GetBlobArguments(),
                     GetQueueArguments(),
                     GetTableArguments(),
+                    GetSilentArguments(),
                     GetLocation()
                 }.Where(x => !string.IsNullOrEmpty(x)).ToArray();
 

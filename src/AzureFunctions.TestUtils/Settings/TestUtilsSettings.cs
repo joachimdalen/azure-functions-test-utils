@@ -68,6 +68,11 @@
         /// Start Azurite alongside function app host
         /// </summary>
         public bool RunAzurite { get; set; }
+        
+        /// <summary>
+        /// Run Azurite in silent mode (no logs)
+        /// </summary>
+        public bool RunAzuriteSilent { get; set; }
 
         /// <summary>
         /// Decides if containers created by the function app should be persisted after test run.

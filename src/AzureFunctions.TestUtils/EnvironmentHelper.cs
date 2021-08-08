@@ -12,7 +12,8 @@ namespace AzureFunctions.TestUtils
         public static string DataDirectory => Environment.GetEnvironmentVariable("AFTU_DATA_DIRECTORY");
         public static bool? UseAzuriteStorage => GetBoolEnvironmentVariable("AFTU_USE_AZURITE_STORAGE");
         public static bool? RunAzurite => GetBoolEnvironmentVariable("AFTU_RUN_AZURITE");
-
+        public static bool? RunAzuriteSilent => GetBoolEnvironmentVariable("AFTU_AZURITE_SILENT");
+        
         public static bool? PersistAzureContainers =>
             GetBoolEnvironmentVariable("AFTU_PERSIST_AZURE_CONTAINERS");
 

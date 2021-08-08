@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -29,6 +29,7 @@ namespace AzureFunctions.TestUtils
             Logger.ClearLogs();
             settings.DataDirectory = GetFirstNotNullOrEmpty(EnvironmentHelper.DataDirectory, settings.DataDirectory);
             settings.RunAzurite = GetFirstBool(EnvironmentHelper.RunAzurite, settings.RunAzurite);
+            settings.RunAzuriteSilent = GetFirstBool(EnvironmentHelper.RunAzuriteSilent, settings.RunAzuriteSilent);
             settings.ClearStorageAfterRun =
                 GetFirstBool(EnvironmentHelper.ClearStorageAfterRun, settings.ClearStorageAfterRun);
             settings.UseAzuriteStorage = GetFirstBool(EnvironmentHelper.UseAzuriteStorage, settings.UseAzuriteStorage);

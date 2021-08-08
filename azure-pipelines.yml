@@ -8,6 +8,10 @@ parameters:
     type: boolean
     default: false
     displayName: "Write logfiles"
+  - name: "AZURITE_SILENT"
+    type: boolean
+    default: false
+    displayName: "Run Azurite in silent mode"
 
 variables:
   BUILD_CONFIGURATION: "Debug"
@@ -60,6 +64,7 @@ stages:
             env:
               AFTU_RUN_AZURITE: true
               AFTU_WRITE_LOG: ${{ parameters.WRITE_LOG }}
+              AFTU_AZURITE_SILENT: ${{ parameters.AZURITE_SILENT }}
             inputs:
               command: "test"
               projects: "**/*Tests/*IntegrationTests.csproj"
