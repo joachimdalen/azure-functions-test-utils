@@ -44,6 +44,7 @@ namespace AzureFunctions.TestUtils.Handlers
             if (Context.Data.Settings.RunAzurite)
             {
                 var azuriteHost = Context.Data.Settings.AzuritePath;
+                var writeLog = EnvironmentHelper.WriteLog.HasValue && EnvironmentHelper.WriteLog.Value;
 
                 var arguments = new[]
                 {
@@ -60,20 +61,27 @@ namespace AzureFunctions.TestUtils.Handlers
                     {
                         FileName = azuriteHost,
                         Arguments = string.Join(" ", arguments),
-                        RedirectStandardError = true,
-                        RedirectStandardOutput = true,
+                        RedirectStandardError = writeLog,
+                        RedirectStandardOutput = writeLog,
                         UseShellExecute = false
-                        
                     },
                 };
-                _azuriteProcess.ErrorDataReceived += (sender, args) => Logger.Log("azurite-error", args.Data);
-                _azuriteProcess.OutputDataReceived += (sender, args) => Logger.Log("azurite", args.Data);
-                var success = _azuriteProcess.Start();
-                _azuriteProcess.BeginErrorReadLine();
-                _azuriteProcess.BeginOutputReadLine();
-                if (!success)
+
+                if (writeLog)
+                {
+                    _azuriteProcess.ErrorDataReceived += (sender, args) => Logger.Log("azurite-error", args.Data);
+                    _azuriteProcess.OutputDataReceived += (sender, args) => Logger.Log("azurite", args.Data);
+                }
+
+                if (!_azuriteProcess.Start())
                 {
                     throw new InvalidOperationException("Could not start Azurite host.");
+                }
+
+                if (writeLog)
+                {
+                    _azuriteProcess.BeginErrorReadLine();
+                    _azuriteProcess.BeginOutputReadLine();
                 }
 
                 if (_azuriteProcess.HasExited)

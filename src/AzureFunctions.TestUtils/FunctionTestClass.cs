@@ -113,17 +113,13 @@ namespace AzureFunctions.TestUtils
                 Value = x.Value,
                 Scope = x.AuthLevel
             }).ToArray() ?? Array.Empty<FunctionKey>();
-            var functionsToRun = currentTest.GetStartFunctions()?.FirstOrDefault()?.FunctionNames;
-            var enableAuth = currentTest.GetUseFunctionAuth().Any();
-            var queues = currentTest.GetQueues().SelectMany(x => x.QueueNames).Distinct().ToArray();
-            var containers = currentTest.GetBlobContainers().SelectMany(x => x.ContainerNames).Distinct().ToArray();
-            var tables = currentTest.GetTables().SelectMany(x => x.TableNames).Distinct().ToArray();
+
             Context.Data.FunctionKeys = functionKeys;
-            Context.Data.FunctionsToRun = functionsToRun;
-            Context.Data.EnableAuth = enableAuth;
-            Context.Data.Queues = queues;
-            Context.Data.BlobContainers = containers;
-            Context.Data.Tables = tables;
+            Context.Data.FunctionsToRun = currentTest.GetStartFunctions()?.FirstOrDefault()?.FunctionNames;
+            Context.Data.EnableAuth = currentTest.GetUseFunctionAuth().Any();
+            Context.Data.Queues = currentTest.GetQueues().SelectMany(x => x.QueueNames).Distinct().ToArray();
+            Context.Data.BlobContainers = currentTest.GetBlobContainers().SelectMany(x => x.ContainerNames).Distinct().ToArray();
+            Context.Data.Tables = currentTest.GetTables().SelectMany(x => x.TableNames).Distinct().ToArray();
 
             if (Context.Data.Settings.UseAzuriteStorage)
             {

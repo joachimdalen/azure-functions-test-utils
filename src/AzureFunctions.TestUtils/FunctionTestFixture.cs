@@ -67,6 +67,7 @@ namespace AzureFunctions.TestUtils
             var functionHostPath = Context.Data.Settings.FuncHostPath;
             var functionAppFolder = Context.Data.Settings.FuncAppPath;
             var functionHostPort = Context.Data.Settings.FuncHostPort;
+            var writeLog = EnvironmentHelper.WriteLog.HasValue && EnvironmentHelper.WriteLog.Value;
 
             var arguments = new[]
             {
@@ -86,22 +87,29 @@ namespace AzureFunctions.TestUtils
                         FileName = dotnetExePath,
                         Arguments = string.Join(" ", arguments),
                         WorkingDirectory = functionAppFolder,
-                        RedirectStandardError = true,
-                        RedirectStandardOutput = true,
+                        RedirectStandardError = writeLog,
+                        RedirectStandardOutput = writeLog,
                         UseShellExecute = false
                     },
                 };
                 _funcHostProcess.StartInfo.EnvironmentVariables["AzureWebJobsStorage"] =
                     Context.Data.Settings.StorageConnectionString;
 
-                _funcHostProcess.ErrorDataReceived += (sender, args) => Logger.Log("func-host-error", args.Data);
-                _funcHostProcess.OutputDataReceived += (sender, args) => Logger.Log("func-host", args.Data);
-                var success = _funcHostProcess.Start();
-                _funcHostProcess.BeginErrorReadLine();
-                _funcHostProcess.BeginOutputReadLine();
-                if (!success)
+                if (writeLog)
+                {
+                    _funcHostProcess.ErrorDataReceived += (sender, args) => Logger.Log("func-host-error", args.Data);
+                    _funcHostProcess.OutputDataReceived += (sender, args) => Logger.Log("func-host", args.Data);
+                }
+
+                if (!_funcHostProcess.Start())
                 {
                     throw new InvalidOperationException("Could not start Azure Functions host.");
+                }
+
+                if (writeLog)
+                {
+                    _funcHostProcess.BeginErrorReadLine();
+                    _funcHostProcess.BeginOutputReadLine();
                 }
             }
 
