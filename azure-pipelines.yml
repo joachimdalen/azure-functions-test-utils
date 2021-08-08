@@ -62,10 +62,10 @@ stages:
             condition: always()
             inputs:
               targetType: 'inline'
-              script: 'cp -r /tmp/aftu $(Pipeline.Workspace)/aftu'
+              script: 'cp -r /tmp/aftu $(Pipeline.Workspace)'
           - task: PublishPipelineArtifact@1
             condition: always()
             inputs:
-              targetPath: '$(Pipeline.Workspace)'
+              targetPath: '$(Pipeline.Workspace)/aftu'
               artifact: 'aftu-logs'
               publishLocation: 'pipeline'
