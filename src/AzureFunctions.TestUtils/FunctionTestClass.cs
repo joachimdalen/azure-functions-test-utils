@@ -42,7 +42,7 @@ namespace AzureFunctions.TestUtils
                     GetFirstNotNullOrEmpty(EnvironmentHelper.DotNetPath, ExecutableResolver.GetDotNetPath());
             }
 
-            if (string.IsNullOrEmpty(settings.AzuritePath))
+            if (string.IsNullOrEmpty(settings.AzuritePath) && settings.RunAzurite)
             {
                 settings.AzuritePath =
                     GetFirstNotNullOrEmpty(EnvironmentHelper.AzuritePath, ExecutableResolver.GetAzuritePath());
