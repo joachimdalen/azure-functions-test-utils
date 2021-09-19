@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AzureFunctions.TestUtils\AzureFunctions.TestUtils.csproj" />
+      <ProjectReference Include="..\JoachimDalen.AzureFunctions.TestUtils\JoachimDalen.AzureFunctions.TestUtils.csproj" />
       <ProjectReference Include="..\SampleFunctions\SampleFunctions.csproj" />
     </ItemGroup>
 

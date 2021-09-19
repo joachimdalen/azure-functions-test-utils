@@ -1,5 +1,5 @@
-using AzureFunctions.TestUtils;
-using AzureFunctions.TestUtils.Settings;
+using JoachimDalen.AzureFunctions.TestUtils;
+using JoachimDalen.AzureFunctions.TestUtils.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace SampleFunctions.IntegrationTests

@@ -1,8 +1,8 @@
 using System.Net.Http;
 using System.Threading.Tasks;
-using AzureFunctions.TestUtils.Asserts;
-using AzureFunctions.TestUtils.Attributes;
-using AzureFunctions.TestUtils.Models;
+using JoachimDalen.AzureFunctions.TestUtils.Asserts;
+using JoachimDalen.AzureFunctions.TestUtils.Attributes;
+using JoachimDalen.AzureFunctions.TestUtils.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SampleFunctions.Functions;
 

@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JoachimDalen.AzureFunctions.TestUtils", "JoachimDalen.AzureFunctions.TestUtils\JoachimDalen.AzureFunctions.TestUtils.csproj", "{1038365E-1E94-4999-B1EF-8A1B451E6F75}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{CD83571E-0B67-47FB-BD08-4C6D443D67F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleFunctions", "SampleFunctions\SampleFunctions.csproj", "{88245FC7-8BAF-471D-BCC4-C4AC610BF169}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleFunctions.IntegrationTests", "SampleFunctions.IntegrationTests\SampleFunctions.IntegrationTests.csproj", "{11652EBA-4905-4BC1-9AEE-3139CA466096}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1038365E-1E94-4999-B1EF-8A1B451E6F75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1038365E-1E94-4999-B1EF-8A1B451E6F75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1038365E-1E94-4999-B1EF-8A1B451E6F75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1038365E-1E94-4999-B1EF-8A1B451E6F75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88245FC7-8BAF-471D-BCC4-C4AC610BF169}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88245FC7-8BAF-471D-BCC4-C4AC610BF169}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88245FC7-8BAF-471D-BCC4-C4AC610BF169}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88245FC7-8BAF-471D-BCC4-C4AC610BF169}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11652EBA-4905-4BC1-9AEE-3139CA466096}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11652EBA-4905-4BC1-9AEE-3139CA466096}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11652EBA-4905-4BC1-9AEE-3139CA466096}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11652EBA-4905-4BC1-9AEE-3139CA466096}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{88245FC7-8BAF-471D-BCC4-C4AC610BF169} = {CD83571E-0B67-47FB-BD08-4C6D443D67F3}
+		{11652EBA-4905-4BC1-9AEE-3139CA466096} = {CD83571E-0B67-47FB-BD08-4C6D443D67F3}
+	EndGlobalSection
+EndGlobal
