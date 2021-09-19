@@ -40,14 +40,6 @@ stages:
             inputs:
               targetType: inline
               script: npm i -g azure-functions-core-tools@3
-          - task: Bash@3
-            displayName: "Debug log"
-            inputs:
-              targetType: inline
-              script: |
-                which func
-                ls -l /opt/hostedtoolcache/node/13.14.0/x64/lib/node_modules/azure-functions-core-tools
-                ls -l /opt/hostedtoolcache/node/13.14.0/x64/lib/node_modules/azure-functions-core-tools/bin
           - task: DotNetCoreCLI@2
             displayName: "Restore project dependencies"
             inputs:
