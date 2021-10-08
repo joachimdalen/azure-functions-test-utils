@@ -12,9 +12,31 @@ parameters:
     type: boolean
     default: false
     displayName: "Run Azurite in silent mode"
+  - name: SELECTED_PACKAGE_VERSION
+    type: string
+    displayName: 'Package Version'
+    default: 'not-set'
+  - name: "IS_PREVIEW"
+    type: boolean
+    default: false
+    displayName: "Is Pre-Release"
+  - name: "INCREASE_MAJOR"
+    type: boolean
+    default: false
+    displayName: "Increase Major Version"
+  - name: "INCREASE_MINOR"
+    type: boolean
+    default: false
+    displayName: "Increase Minor Version"
+  - name: "INCREASE_PATCH"
+    type: boolean
+    default: false
+    displayName: "Increase Patch Version"
 
 variables:
   BUILD_CONFIGURATION: "Debug"
+  PACKAGE_NAME: 'JoachimDalen.AzureFunctions.TestUtils'
+  isMaster: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
 
 stages:
   - stage: buildAndTest
@@ -62,6 +84,25 @@ stages:
               projects: "**/*Tests/*IntegrationTests.csproj"
               arguments: '--configuration $(BUILD_CONFIGURATION)  --collect "Code coverage"'
               testRunTitle: "Integration Tests"
+          - task: PowerShell@2
+            displayName: 'Set package version'
+            name: SetVersion
+            inputs:
+              filePath: '$(Build.SourcesDirectory)/ci/get-updated-package-version.ps1'
+              arguments: '-IncreaseMajor $${{ parameters.INCREASE_MAJOR }} -IncreaseMinor $${{ parameters.INCREASE_MINOR }} -IncreasePatch $${{ parameters.INCREASE_PATCH }} -SelectedVersion ${{ parameters.SELECTED_PACKAGE_VERSION }} -PackageName $(PACKAGE_NAME)'
+              failOnStderr: true
+              showWarnings: true
+              pwsh: true
+          - task: DotNetCoreCLI@2
+            displayName: 'Pack Nuget - $(BUILD_CONFIGURATION)'
+            inputs:
+              command: 'pack'
+              packagesToPack: '$(Build.SourcesDirectory)/src/JoachimDalen.AzureFunctions.TestUtils/JoachimDalen.AzureFunctions.TestUtils.csproj'
+              configuration: '$(BUILD_CONFIGURATION)'
+              packDirectory: '$(Build.ArtifactStagingDirectory)/nuget'
+              nobuild: true
+              versioningScheme: 'byEnvVar'
+              versionEnvVar: 'SETVERSION_UPDATED_PACKAGE_VERSION'
           - task: Bash@3
             condition: and(always(), eq(${{ parameters.WRITE_LOG }}, true))
             inputs:
@@ -73,3 +114,41 @@ stages:
               targetPath: "$(Pipeline.Workspace)/aftu"
               artifact: "aftu-logs"
               publishLocation: "pipeline"
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Nuget'
+            inputs:
+              targetPath: "$(Build.ArtifactStagingDirectory)/nuget"
+              artifact: "nuget-package"
+              publishLocation: "pipeline"
+  - stage: publish_nuget
+    displayName: 'Publish package'
+    condition: eq(variables.isMaster, true)
+    dependsOn: 'buildAndTest'
+    jobs:
+      - deployment:
+        displayName: 'Publish package'
+        environment: 'nuget-prod'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: none
+                - download: current
+                  artifact: 'nuget-package'
+                - task: DotNetCoreCLI@2
+                  displayName: 'Push nuget package'
+                  inputs:
+                    command: 'push'
+                    packagesToPush: '$(Pipeline.Workspace)/nuget-package/*.nupkg'
+                    nuGetFeedType: 'external'
+                    publishFeedCredentials: 'nuget-azure-functions'
+                - task: GitHubRelease@1
+                  displayName: 'Create GitHub Release'
+                  inputs:
+                    gitHubConnection: github-azure-functions
+                    repositoryName: joachimdalen/azure-functions-test-utils
+                    tagSource: userSpecifiedTag
+                    tag: $(Build.BuildNumber)      
+                    assets: $(Pipeline.Workspace)/nuget-package/*.nupkg
+                    addChangeLog: false
+                    isPreRelease: $${{ parameters.IS_PREVIEW }}
