@@ -109,7 +109,7 @@ namespace JoachimDalen.AzureFunctions.TestUtils.Handlers
             if (containerNames == null || !containerNames.Any()) return;
             foreach (var container in containerNames)
             {
-                _blobServiceClient.CreateBlobContainer(container);
+                _blobServiceClient.GetBlobContainerClient(container).CreateIfNotExists();
             }
         }
 
@@ -152,7 +152,7 @@ namespace JoachimDalen.AzureFunctions.TestUtils.Handlers
 
             foreach (var queueName in queueNames)
             {
-                _queueServiceClient.CreateQueue(queueName);
+                _queueServiceClient.GetQueueClient(queueName).CreateIfNotExists();
             }
         }
 
