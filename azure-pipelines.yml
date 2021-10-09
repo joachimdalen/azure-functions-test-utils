@@ -150,8 +150,10 @@ stages:
                     gitHubConnection: github-azure-functions
                     repositoryName: joachimdalen/azure-functions-test-utils
                     tagSource: userSpecifiedTag
-                    tag: $(PACKAGE_VERSION)      
+                    tag: v$(PACKAGE_VERSION)
+                    title: 'v$(PACKAGE_VERSION): Update'
                     assets: $(Pipeline.Workspace)/nuget-package/*.nupkg
                     addChangeLog: false
                     isDraft: true
                     isPreRelease: $${{ parameters.IS_PREVIEW }}
+                    releaseNotesSource: inline
