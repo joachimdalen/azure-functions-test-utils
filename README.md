@@ -181,5 +181,7 @@ public async Task CreateOrder_Sends_Confirmation()
 | `DataDirectory`          | `AFTU_DATA_DIRECTORY`           | Directory to store Azurite data in. Defaults to TestResults directory for the given test  |
 | `UseAzuriteStorage`      | `AFTU_USE_AZURITE_STORAGE`      | Use azurite storage emulator. This should be true if using any storage related attributes |
 | `RunAzurite`             | `AFTU_RUN_AZURITE`              | Start Azurite alongside function app host                                                 |
+| `RunAzuriteSilent`       | `AFTU_AZURITE_SILENT`           | Run Azurite in silen mode                                                                 |
 | `PersistAzureContainers` | `AFTU_PERSIST_AZURE_CONTAINERS` | Decides if containers created by the function app should be persisted after test run.     |
 | `ClearStorageAfterRun`   | `AFTU_CLEAR_STORAGE_AFTER_RUN`  | Clears Azurite after each test run and provides a clean container for new runs            |
+| `WriteLog`               | `AFTU_WRITE_LOG`                | Write log to file system for Azurite and Function host. Written to `/tmp/aftu`            |

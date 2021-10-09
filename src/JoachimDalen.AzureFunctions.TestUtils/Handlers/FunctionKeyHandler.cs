@@ -111,38 +111,29 @@ namespace JoachimDalen.AzureFunctions.TestUtils.Handlers
             var systemKeys = hostKeys.Where(x => x.Scope == FunctionAuthLevel.System);
             var path = Path.Join(GetFunctionHostId(), "host.json");
             var client = _blobContainerClient.GetBlobClient(path);
-            FunctionSecretRoot root;
-            if (client.Exists())
+            client.DeleteIfExists();
+            var root = new FunctionSecretRoot
             {
-                var blob = client.DownloadContent();
-                var text = Encoding.UTF8.GetString(blob.Value.Content);
-                root = JsonConvert.DeserializeObject<FunctionSecretRoot>(text);
-            }
-            else
-            {
-                root = new FunctionSecretRoot
+                MasterKey = new FunctionSecret
                 {
-                    MasterKey = new FunctionSecret
-                    {
-                        Name = "_master",
-                        Value = masterKey?.Value ?? GenerateSecret()
-                    },
-                    FunctionKeys = functionKeys.Select(x => new FunctionSecret
-                    {
-                        Name = x.Name,
-                        Value = x.Value ?? GenerateSecret()
-                    }).ToArray(),
-                    SystemKeys = systemKeys.Select(x => new FunctionSecret
-                    {
-                        Name = x.Name,
-                        Value = x.Value ?? GenerateSecret()
-                    }).ToArray(),
-                };
-            }
-
+                    Name = "_master",
+                    Value = masterKey?.Value ?? GenerateSecret()
+                },
+                FunctionKeys = functionKeys.Select(x => new FunctionSecret
+                {
+                    Name = x.Name,
+                    Value = x.Value ?? GenerateSecret()
+                }).ToArray(),
+                SystemKeys = systemKeys.Select(x => new FunctionSecret
+                {
+                    Name = x.Name,
+                    Value = x.Value ?? GenerateSecret()
+                }).ToArray(),
+            };
+            
             var jsonContent = JsonConvert.SerializeObject(root, Formatting.Indented);
             using var ms = new MemoryStream(Encoding.UTF8.GetBytes(jsonContent));
-            _blobContainerClient.UploadBlob(path, ms);
+            client.Upload(ms);
         }
     }
 }
