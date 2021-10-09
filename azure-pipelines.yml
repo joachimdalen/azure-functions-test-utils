@@ -147,12 +147,11 @@ stages:
                   artifact: 'nuget-package'
                 - download: current
                   artifact: 'release-notes'
-                - task: DotNetCoreCLI@2
+                - task: Bash@3
                   displayName: 'Push nuget package'
                   inputs:
-                    command: 'custom'
-                    custom: 'nuget push'
-                    arguments: '$(Pipeline.Workspace)/nuget-package/JoachimDalen.AzureFunctions.TestUtils.$(PACKAGE_VERSION).nupkg -k $(NUGET_API_KEY) -s https://api.nuget.org/v3/index.json'
+                    targetType: inline
+                    script: 'dotnet nuget push $(Pipeline.Workspace)/nuget-package/JoachimDalen.AzureFunctions.TestUtils.$(PACKAGE_VERSION).nupkg -k $(NUGET_API_KEY) -s https://api.nuget.org/v3/index.json'
                 - task: GitHubRelease@1
                   displayName: 'Create GitHub Release'
                   inputs:
