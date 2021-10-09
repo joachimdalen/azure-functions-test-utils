@@ -89,7 +89,7 @@ stages:
             name: SetVersion
             inputs:
               filePath: '$(Build.SourcesDirectory)/ci/get-updated-package-version.ps1'
-              arguments: '-IncreaseMajor $${{ parameters.INCREASE_MAJOR }} -IncreaseMinor $${{ parameters.INCREASE_MINOR }} -IncreasePatch $${{ parameters.INCREASE_PATCH }} -SelectedVersion ${{ parameters.SELECTED_PACKAGE_VERSION }} -PackageName $(PACKAGE_NAME)'
+              arguments: '-IncreaseMajor $${{ parameters.INCREASE_MAJOR }} -IncreaseMinor $${{ parameters.INCREASE_MINOR }} -IncreasePatch $${{ parameters.INCREASE_PATCH }} -SelectedVersion ${{ parameters.SELECTED_PACKAGE_VERSION }} -PackageName $(PACKAGE_NAME) -IsPreview $${{ parameters.IS_PREVIEW }}'
               failOnStderr: true
               showWarnings: true
               pwsh: true
@@ -120,9 +120,15 @@ stages:
               targetPath: "$(Build.ArtifactStagingDirectory)/nuget"
               artifact: "nuget-package"
               publishLocation: "pipeline"
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Release Notes'
+            inputs:
+              targetPath: '$(Build.SourcesDirectory)/release-notes/v$(SetVersion.UPDATED_PACKAGE_VERSION).md'
+              artifact: "release-notes"
+              publishLocation: "pipeline"
   - stage: publish_nuget
     displayName: 'Publish package'
-#    condition: eq(variables.isMaster, true)
+    condition: eq(variables.isMaster, true)
     dependsOn: 'buildAndTest'
     jobs:
       - deployment:
@@ -137,13 +143,15 @@ stages:
                 - download: none
                 - download: current
                   artifact: 'nuget-package'
-                # - task: DotNetCoreCLI@2
-                #   displayName: 'Push nuget package'
-                #   inputs:
-                #     command: 'push'
-                #     packagesToPush: '$(Pipeline.Workspace)/nuget-package/*.nupkg'
-                #     nuGetFeedType: 'external'
-                #     publishFeedCredentials: 'nuget-azure-functions'
+                - download: current
+                  artifact: 'release-notes'
+                - task: DotNetCoreCLI@2
+                  displayName: 'Push nuget package'
+                  inputs:
+                    command: 'push'
+                    packagesToPush: '$(Pipeline.Workspace)/nuget-package/*.nupkg'
+                    nuGetFeedType: 'external'
+                    publishFeedCredentials: 'nuget-azure-functions'
                 - task: GitHubRelease@1
                   displayName: 'Create GitHub Release'
                   inputs:
@@ -156,4 +164,5 @@ stages:
                     addChangeLog: false
                     isDraft: true
                     isPreRelease: $${{ parameters.IS_PREVIEW }}
-                    releaseNotesSource: inline
+                    releaseNotesSource: filePath
+                    releaseNotesFilePath: $(Pipeline.Workspace)/release-notes/v$(PACKAGE_VERSION).md
