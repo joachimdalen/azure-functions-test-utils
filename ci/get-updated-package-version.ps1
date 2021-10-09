@@ -1,4 +1,4 @@
-param ([bool] $IncreaseMajor, [bool] $IncreaseMinor, [bool] $IncreasePatch, [string] $SelectedVersion, [string] $PackageName)
+param ([bool] $IncreaseMajor, [bool] $IncreaseMinor, [bool] $IncreasePatch, [string] $SelectedVersion, [string] $PackageName, [bool] $IsPreview)
 
 if ($SelectedVersion -ne "not-set") {
     Write-Host "Version set manually";
@@ -51,8 +51,8 @@ else {
         Write-Host "Updating patch version"
         $patch = $patch + 1;
     }
-    
-    $newVersion = [Semver.SemVersion]::New($major, $minor, $patch, $semVer.Prerelease)
+    $previewTag = $IsPreview ? "preview" : $NULL;
+    $newVersion = [Semver.SemVersion]::New($major, $minor, $patch, $previewTag)
     
     Write-Host "Setting new version $newVersion"
     Write-Output "##vso[task.setvariable variable=UPDATED_PACKAGE_VERSION;isOutput=true]$newVersion"
