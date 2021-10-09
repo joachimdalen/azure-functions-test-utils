@@ -122,10 +122,12 @@ stages:
               publishLocation: "pipeline"
   - stage: publish_nuget
     displayName: 'Publish package'
-    condition: eq(variables.isMaster, true)
+#    condition: eq(variables.isMaster, true)
     dependsOn: 'buildAndTest'
     jobs:
       - deployment:
+        variables:
+          PACKAGE_VERSION: $[ stageDependencies.buildAndTest.Build.outputs['SetVersion.UPDATED_PACKAGE_VERSION'] ]
         displayName: 'Publish package'
         environment: 'nuget-prod'
         strategy:
@@ -135,20 +137,21 @@ stages:
                 - download: none
                 - download: current
                   artifact: 'nuget-package'
-                - task: DotNetCoreCLI@2
-                  displayName: 'Push nuget package'
-                  inputs:
-                    command: 'push'
-                    packagesToPush: '$(Pipeline.Workspace)/nuget-package/*.nupkg'
-                    nuGetFeedType: 'external'
-                    publishFeedCredentials: 'nuget-azure-functions'
+                # - task: DotNetCoreCLI@2
+                #   displayName: 'Push nuget package'
+                #   inputs:
+                #     command: 'push'
+                #     packagesToPush: '$(Pipeline.Workspace)/nuget-package/*.nupkg'
+                #     nuGetFeedType: 'external'
+                #     publishFeedCredentials: 'nuget-azure-functions'
                 - task: GitHubRelease@1
                   displayName: 'Create GitHub Release'
                   inputs:
                     gitHubConnection: github-azure-functions
                     repositoryName: joachimdalen/azure-functions-test-utils
                     tagSource: userSpecifiedTag
-                    tag: $(Build.BuildNumber)      
+                    tag: $(PACKAGE_VERSION)      
                     assets: $(Pipeline.Workspace)/nuget-package/*.nupkg
                     addChangeLog: false
+                    isDraft: true
                     isPreRelease: $${{ parameters.IS_PREVIEW }}
