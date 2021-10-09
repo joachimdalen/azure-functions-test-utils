@@ -12,6 +12,7 @@
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageVersion>0.0.1-preview</PackageVersion>
+        <PackageTags>azure-functions test-utils integration-testing azure</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>
