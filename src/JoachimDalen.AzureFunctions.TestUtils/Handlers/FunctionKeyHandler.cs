@@ -88,6 +88,9 @@ namespace JoachimDalen.AzureFunctions.TestUtils.Handlers
             };
 
             var jsonContent = JsonConvert.SerializeObject(model, Formatting.Indented);
+
+            _blobContainerClient.DeleteBlobIfExists(path);
+
             using var ms = new MemoryStream(Encoding.UTF8.GetBytes(jsonContent));
             _blobContainerClient.UploadBlob(path, ms);
         }
@@ -139,6 +142,8 @@ namespace JoachimDalen.AzureFunctions.TestUtils.Handlers
                     }).ToArray(),
                 };
             }
+
+            _blobContainerClient.DeleteBlobIfExists(path);
 
             var jsonContent = JsonConvert.SerializeObject(root, Formatting.Indented);
             using var ms = new MemoryStream(Encoding.UTF8.GetBytes(jsonContent));
