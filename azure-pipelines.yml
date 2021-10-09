@@ -128,7 +128,7 @@ stages:
               publishLocation: "pipeline"
   - stage: publish_nuget
     displayName: 'Publish package'
-   # condition: eq(variables.isMaster, true)
+    condition: eq(variables.isMaster, true)
     dependsOn: 'buildAndTest'
     jobs:
       - deployment:
