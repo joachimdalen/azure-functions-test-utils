@@ -133,7 +133,9 @@ stages:
     jobs:
       - deployment:
         variables:
-          PACKAGE_VERSION: $[ stageDependencies.buildAndTest.Build.outputs['SetVersion.UPDATED_PACKAGE_VERSION'] ]
+          - group: 'nuget-azure-functions'
+          - name: PACKAGE_VERSION
+            value: $[ stageDependencies.buildAndTest.Build.outputs['SetVersion.UPDATED_PACKAGE_VERSION'] ]
         displayName: 'Publish package'
         environment: 'nuget-prod'
         strategy:
@@ -148,10 +150,9 @@ stages:
                 - task: DotNetCoreCLI@2
                   displayName: 'Push nuget package'
                   inputs:
-                    command: 'push'
-                    packagesToPush: '$(Pipeline.Workspace)/nuget-package/*.nupkg'
-                    nuGetFeedType: 'external'
-                    publishFeedCredentials: 'nuget-azure-functions'
+                    command: 'custom'
+                    custom: 'nuget push'
+                    arguments: '$(Pipeline.Workspace)/nuget-package/JoachimDalen.AzureFunctions.TestUtils.$(PACKAGE_VERSION).nupkg -k $(NUGET_API_KEY) -s https://api.nuget.org/v3/index.json'
                 - task: GitHubRelease@1
                   displayName: 'Create GitHub Release'
                   inputs:
@@ -162,7 +163,6 @@ stages:
                     title: 'v$(PACKAGE_VERSION): Update'
                     assets: $(Pipeline.Workspace)/nuget-package/*.nupkg
                     addChangeLog: false
-                    isDraft: true
                     isPreRelease: $${{ parameters.IS_PREVIEW }}
                     releaseNotesSource: filePath
                     releaseNotesFilePath: $(Pipeline.Workspace)/release-notes/v$(PACKAGE_VERSION).md
